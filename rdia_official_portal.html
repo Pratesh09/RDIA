@@ -1,1532 +1,1615 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RDIA — Research, Development, Intelligence, Defence Association</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    },
-                    colors: {
-                        navy: {
-                            950: '#040811',
-                            900: '#081121',
-                            800: '#0e1b33',
-                            700: '#162847',
-                        }
-                    }
-                }
-            }
-        };
-    </script>
-    <style>
-        /* Subtle tactical grid backdrop across the command-center canvas */
-        .tactical-grid {
-            background-size: 44px 44px;
-            background-image:
-                linear-gradient(to right, rgba(34, 211, 238, 0.04) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(16, 185, 129, 0.035) 1px, transparent 1px);
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RDIA | Research, Development, Intelligence, Defence Association</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            obsidian: '#06090f',
+            slatepanel: '#0c121e',
+            slateborder: '#1a253a',
+            cyanaccent: '#06b6d4',
+            emeraldaccent: '#10b981',
+          },
+          backgroundImage: {
+            'grid-pattern': 'linear-gradient(to right, rgba(6, 182, 212, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(6, 182, 212, 0.05) 1px, transparent 1px)',
+          }
         }
-
-        /* Simulated 1602 I2C LCD screen styling */
-        .lcd-bezel {
-            background: linear-gradient(145deg, #0b192c, #060e1a);
-            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.75);
-        }
-
-        .lcd-screen {
-            background: #0c241d;
-            border: 1px solid rgba(52, 211, 153, 0.35);
-            box-shadow: inset 0 0 18px rgba(16, 185, 129, 0.14);
-        }
-    </style>
+      }
+    };
+  </script>
+  <style>
+    body {
+      background-color: #06090f;
+      color: #e2e8f0;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+    .bg-tech-grid {
+      background-size: 36px 36px;
+    }
+    .glass-card {
+      background: rgba(12, 18, 30, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(26, 37, 58, 0.9);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-card:hover {
+      border-color: rgba(6, 182, 212, 0.45);
+      box-shadow: 0 0 28px rgba(6, 182, 212, 0.08);
+    }
+    .scanline {
+      position: relative;
+      overflow: hidden;
+    }
+    .scanline::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 50%, rgba(6, 182, 212, 0.03) 51%, transparent 51%);
+      background-size: 100% 4px;
+      pointer-events: none;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .animate-shake {
+      animation: shake 0.35s ease-in-out;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .live-dot {
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+    .lcd-screen {
+      background: linear-gradient(180deg, #062b22 0%, #041f18 100%);
+      border: 2px solid #0f513f;
+      box-shadow: inset 0 0 14px rgba(16, 185, 129, 0.22);
+      color: #34d399;
+      text-shadow: 0 0 6px rgba(52, 211, 153, 0.5);
+    }
+    /* SCP ACS Styling */
+    .acs-container {
+      border: 1px solid #26334d;
+      background: #080d17;
+    }
+    .acs-stripe-safe { background: #10b981; color: #041f18; }
+    .acs-stripe-euclid { background: #f59e0b; color: #1c1102; }
+    .acs-stripe-keter { background: #ef4444; color: #fff; }
+    .acs-stripe-thaumiel { background: #06b6d4; color: #041d24; }
+    .acs-stripe-apollyon { background: #dc2626; color: #fff; }
+    .acs-stripe-decommissioned { background: #64748b; color: #0f172a; }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #06090f; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
+  </style>
 </head>
-<body class="bg-navy-950 text-slate-200 font-sans antialiased tactical-grid selection:bg-cyan-500/30 selection:text-cyan-200">
+<body class="bg-obsidian bg-grid-pattern bg-tech-grid min-h-screen flex flex-col selection:bg-cyan-500/30 selection:text-cyan-200">
 
-    <!-- ========================================================= -->
-    <!-- NAVIGATION BAR                                            -->
-    <!-- ========================================================= -->
-    <header class="sticky top-0 z-40 backdrop-blur-md bg-navy-950/85 border-b border-slate-800/80">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-            <!-- Brand Mark -->
-            <a href="#top" class="flex items-center space-x-3 group shrink-0">
-                <div class="w-9 h-9 rounded-lg bg-cyan-500/10 border border-cyan-400/40 flex items-center justify-center group-hover:border-cyan-300 transition-colors">
-                    <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z" />
-                        <circle cx="12" cy="12" r="2.5" stroke-width="1.8" />
-                    </svg>
-                </div>
-                <div class="flex flex-col">
-                    <span class="font-mono text-sm font-bold tracking-wider text-white">RDIA</span>
-                    <span class="font-mono text-[10px] text-slate-400 tracking-widest uppercase hidden sm:inline">Research • Dev • Intel • Defence</span>
-                </div>
+  <!-- Top Navigation Bar -->
+  <header class="sticky top-0 z-40 border-b border-slateborder bg-obsidian/90 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <!-- Brand Identity -->
+      <a href="#top" class="flex items-center gap-3 group">
+        <div class="w-9 h-9 rounded-lg bg-cyan-500/10 border border-cyan-500/40 flex items-center justify-center group-hover:bg-cyan-500/20 transition">
+          <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-mono font-bold tracking-wider text-white text-base">RDIA</span>
+            <span class="hidden sm:inline-block text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">SHRI KRISHNA HEIGHTS</span>
+          </div>
+          <p class="text-[10px] font-mono text-slate-400 tracking-widest uppercase">Research • Dev • Intel • Defence</p>
+        </div>
+      </a>
+
+      <!-- Navigation Links -->
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+        <a href="#about" class="hover:text-cyan-400 transition">About &amp; Branches</a>
+        <a href="#projects" class="hover:text-cyan-400 transition">Active Projects</a>
+        <a href="#staff-portal" class="hover:text-cyan-400 transition flex items-center gap-1.5">
+          <span id="nav-portal-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+          <span>Staff Portal</span>
+        </a>
+      </nav>
+
+      <!-- Action Button -->
+      <div class="flex items-center gap-3">
+        <a href="#staff-portal" id="nav-auth-badge" class="font-mono text-xs px-3.5 py-2 rounded-lg bg-slatepanel border border-slateborder hover:border-cyan-500/50 text-cyan-400 transition flex items-center gap-2">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          <span id="nav-auth-text">STAFF ACCESS</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="top" class="flex-grow">
+
+    <!-- HERO SECTION -->
+    <section class="relative pt-16 pb-20 sm:pt-24 sm:pb-28 border-b border-slateborder/70">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl">
+          <div class="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-slatepanel border border-slateborder mb-6">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 live-dot"></span>
+            <span class="font-mono text-xs text-slate-300 tracking-wide">SHRI KRISHNA HEIGHTS • HENDREPADA, BADLAPUR 421503</span>
+          </div>
+
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.12] mb-6">
+            Welfare, Innovation &amp; Engineering for <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">Societal Progress.</span>
+          </h1>
+
+          <p class="text-base sm:text-lg text-slate-300 leading-relaxed max-w-3xl mb-8 bg-slatepanel/70 border-l-4 border-cyan-500 pl-4 py-3 rounded-r-lg">
+            "RDIA is an organization for the welfare of apartment complex Shri Krishna Heights, Hendrepada badlapur 421503 we help prduce projects and discover new things this innovation helps us to progress in the development of society"
+          </p>
+
+          <div class="flex flex-wrap items-center gap-4">
+            <a href="#projects" class="px-6 py-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold text-sm transition shadow-lg shadow-cyan-500/20">
+              Explore Active Projects
             </a>
-
-            <!-- Desktop Links -->
-            <nav class="hidden md:flex items-center space-x-7 text-sm font-medium text-slate-300">
-                <a href="#about" class="hover:text-cyan-400 transition-colors">About Us</a>
-                <a href="#projects" class="hover:text-cyan-400 transition-colors">Latest Projects</a>
-                <a href="#portal" class="hover:text-cyan-400 transition-colors">Staff Portal</a>
-            </nav>
-
-            <!-- Live Status Badge + Mobile Toggle -->
-            <div class="flex items-center space-x-3">
-                <div class="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-navy-900 border border-slate-800 font-mono text-[11px] text-slate-300">
-                    <span id="nav-status-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span id="nav-portal-text">SYS ONLINE // STANDBY</span>
-                </div>
-
-                <button type="button" id="mobile-menu-toggle" aria-label="Toggle Menu" class="md:hidden p-2 rounded-lg bg-navy-900 border border-slate-800 text-slate-300 hover:text-white">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </button>
-            </div>
+            <a href="#staff-portal" class="px-6 py-3 rounded-lg bg-slatepanel hover:bg-slate-800 border border-slateborder text-slate-200 font-mono text-xs tracking-wider uppercase transition">
+              Operative ID Portal &rarr;
+            </a>
+          </div>
         </div>
 
-        <!-- Mobile Drawer -->
-        <div id="mobile-menu" class="hidden md:hidden bg-navy-900/95 border-b border-slate-800 px-4 py-3 space-y-2">
-            <a href="#about" class="block px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-navy-800 hover:text-cyan-400">About Us</a>
-            <a href="#projects" class="block px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-navy-800 hover:text-cyan-400">Latest Projects</a>
-            <a href="#portal" class="block px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-navy-800 hover:text-cyan-400">Staff Portal</a>
+        <!-- Society & Branch Telemetry Strip -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-14">
+          <div class="glass-card rounded-xl p-5">
+            <p class="font-mono text-xs text-slate-400 uppercase mb-1">Complex Jurisdiction</p>
+            <p class="font-mono text-xl sm:text-2xl font-bold text-white">WINGS A – F</p>
+            <p class="text-xs text-emerald-400 mt-1 font-mono">PIN 421503 • Hendrepada</p>
+          </div>
+          <div class="glass-card rounded-xl p-5">
+            <p class="font-mono text-xs text-slate-400 uppercase mb-1">Operational Branches</p>
+            <p class="font-mono text-xl sm:text-2xl font-bold text-cyan-400">06 ACTIVE</p>
+            <p class="text-xs text-slate-400 mt-1">R • D • I • L • C • W</p>
+          </div>
+          <div class="glass-card rounded-xl p-5">
+            <p class="font-mono text-xs text-slate-400 uppercase mb-1">Admin Cap</p>
+            <p class="font-mono text-xl sm:text-2xl font-bold text-white">05 MAX [A]</p>
+            <p class="text-xs text-amber-400 mt-1 font-mono">Strict Rank Hierarchy</p>
+          </div>
+          <div class="glass-card rounded-xl p-5">
+            <p class="font-mono text-xs text-slate-400 uppercase mb-1">Priority System</p>
+            <p class="font-mono text-xl sm:text-2xl font-bold text-emerald-400">R-G-001</p>
+            <p class="text-xs text-slate-400 mt-1">Victorious ROV (V-ROV)</p>
+          </div>
         </div>
-    </header>
+      </div>
+    </section>
 
-    <!-- ========================================================= -->
-    <!-- HERO & ABOUT US SECTION                                   -->
-    <!-- ========================================================= -->
-    <main id="top">
-        <section class="relative pt-14 pb-16 sm:pt-20 sm:pb-24 border-b border-slate-800/70">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="max-w-4xl">
-                    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 font-mono text-xs text-cyan-300 mb-6">
-                        <span>COMMAND BRIEFING</span>
-                        <span class="text-slate-600">//</span>
-                        <span>RDIA ASSOCIATION</span>
-                    </div>
+    <!-- ABOUT US & SIX BRANCHES -->
+    <section id="about" class="py-20 border-b border-slateborder/70">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+          <div>
+            <p class="font-mono text-xs text-cyan-400 tracking-widest uppercase mb-2">// 01. ORGANIZATION MANDATE &amp; BRANCHES</p>
+            <h2 class="text-3xl font-bold text-white">About RDIA &amp; Branch Architecture</h2>
+          </div>
+          <p class="text-sm text-slate-400 max-w-md">
+            Operating across Wings A through F of Shri Krishna Heights to deliver community welfare, technical innovation, and societal development.
+          </p>
+        </div>
 
-                    <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.1] mb-6">
-                        Research, Development, Intelligence, <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">Defence Association</span>
-                    </h1>
-
-                    <p class="text-base sm:text-lg text-slate-300 leading-relaxed max-w-3xl mb-4">
-                        RDIA is an organization for the welfare of apartment complex <strong class="text-white font-semibold">Shri Krishna Heights, Hendrepada badlapur 421503</strong> we help prduce projects and discover new things this innovation helps us to progress in the development of society.
-                    </p>
-
-                    <p class="text-sm sm:text-base text-slate-400 leading-relaxed max-w-3xl mb-8">
-                        Operating under unified <strong class="text-slate-200 font-semibold">HQ oversight</strong> and four specialized operational sectors, RDIA turns hands-on engineering, robotics, and field experimentation into practical community progress for Shri Krishna Heights.
-                    </p>
-
-                    <div class="flex flex-wrap gap-3 sm:gap-4">
-                        <a href="#projects" class="px-5 py-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-navy-950 font-mono text-xs sm:text-sm font-bold transition-all">
-                            EXPLORE LATEST PROJECTS →
-                        </a>
-                        <a href="#portal" class="px-5 py-3 rounded-lg bg-navy-900 hover:bg-navy-800 text-slate-200 border border-slate-700 font-mono text-xs sm:text-sm font-semibold transition-all">
-                            ACCESS STAFF PORTAL
-                        </a>
-                    </div>
-                </div>
-
-                <!-- About Us: HQ Oversight & Four Operational Sectors -->
-                <div id="about" class="mt-16 pt-12 border-t border-slate-800/80 space-y-8">
-                    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                        <div>
-                            <span class="font-mono text-xs text-emerald-400 uppercase tracking-widest">01 // ABOUT US & COMMAND STRUCTURE</span>
-                            <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">Shri Krishna Heights Welfare, HQ Oversight & Sectors</h2>
-                        </div>
-                        <p class="text-sm text-slate-400 max-w-xl">
-                            RDIA is an organization for the welfare of apartment complex Shri Krishna Heights, Hendrepada badlapur 421503 we help prduce projects and discover new things this innovation helps us to progress in the development of society.
-                        </p>
-                    </div>
-
-                    <!-- HQ Command Banner -->
-                    <div class="p-6 rounded-xl bg-navy-900/90 border border-cyan-500/30 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                        <div class="space-y-1.5 max-w-3xl">
-                            <div class="inline-flex items-center space-x-2 font-mono text-xs text-cyan-400 font-semibold">
-                                <span>HQ CENTRAL COMMAND // SHRI KRISHNA HEIGHTS, HENDREPADA BADLAPUR 421503</span>
-                                <span class="text-slate-600">•</span>
-                                <span>STRATEGIC & TECHNICAL OVERSIGHT</span>
-                            </div>
-                            <h3 class="text-xl font-bold text-white">Headquarters Direction & Cross-Branch Integration</h3>
-                            <p class="text-sm text-slate-300 leading-relaxed">
-                                RDIA is an organization for the welfare of apartment complex Shri Krishna Heights, Hendrepada badlapur 421503 we help prduce projects and discover new things this innovation helps us to progress in the development of society.
-                            </p>
-                            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                                HQ governs mission priorities (P1–P3), validates field readiness before river or airspace trials, and ensures hardware reliability from bench prototypes to operational deployment.
-                            </p>
-                        </div>
-                        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-3 shrink-0 font-mono">
-                            <div class="px-4 py-3 rounded-lg bg-navy-950 border border-slate-800">
-                                <div class="text-[10px] text-slate-500">COMMAND</div>
-                                <div class="text-sm font-bold text-cyan-400 mt-0.5">RDIA HQ</div>
-                            </div>
-                            <div class="px-4 py-3 rounded-lg bg-navy-950 border border-slate-800">
-                                <div class="text-[10px] text-slate-500">SECTORS</div>
-                                <div class="text-sm font-bold text-emerald-400 mt-0.5">04 ACTIVE</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Four Operational Sectors -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                        <div class="p-5 rounded-xl bg-navy-900/80 border border-slate-800 hover:border-cyan-500/40 transition-colors">
-                            <div class="font-mono text-xs text-cyan-400 font-bold mb-2">SECTOR 01 // RESEARCH</div>
-                            <h3 class="text-lg font-bold text-white mb-2">Research</h3>
-                            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                                Investigates autonomous navigation, ultrasonic/vision perception roadmaps, multi-carrier lift ratios, and aerodynamic glide profiles.
-                            </p>
-                        </div>
-
-                        <div class="p-5 rounded-xl bg-navy-900/80 border border-slate-800 hover:border-emerald-500/40 transition-colors">
-                            <div class="font-mono text-xs text-emerald-400 font-bold mb-2">SECTOR 02 // DEVELOPMENT</div>
-                            <h3 class="text-lg font-bold text-white mb-2">Development</h3>
-                            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                                Engineers motor drivers, gearmotor drivetrains, sensor modules, I2C displays, pneumatic launchers, and deterministic analog circuits.
-                            </p>
-                        </div>
-
-                        <div class="p-5 rounded-xl bg-navy-900/80 border border-slate-800 hover:border-cyan-500/40 transition-colors">
-                            <div class="font-mono text-xs text-cyan-400 font-bold mb-2">SECTOR 03 // INTELLIGENCE</div>
-                            <h3 class="text-lg font-bold text-white mb-2">Intelligence</h3>
-                            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                                Manages telemetry feeds, river and environmental monitoring data, flight data logging, and regulatory airspace compliance.
-                            </p>
-                        </div>
-
-                        <div class="p-5 rounded-xl bg-navy-900/80 border border-slate-800 hover:border-emerald-500/40 transition-colors">
-                            <div class="font-mono text-xs text-emerald-400 font-bold mb-2">SECTOR 04 // DEFENCE</div>
-                            <h3 class="text-lg font-bold text-white mb-2">Defence</h3>
-                            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                                Focuses on ruggedized field operation, audible warning alerts, perimeter safety protocols, and resilient standalone power systems.
-                            </p>
-                        </div>
-                    </div>
-                </div>
+        <!-- HQ Oversight Banner -->
+        <div class="glass-card rounded-xl p-6 sm:p-8 mb-6 border-l-4 border-l-cyan-400">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div>
+              <div class="inline-flex items-center gap-2 font-mono text-xs text-cyan-400 mb-2">
+                <span>RDIA CENTRAL COMMAND</span>
+                <span>•</span>
+                <span>SHRI KRISHNA HEIGHTS, HENDREPADA, BADLAPUR 421503</span>
+              </div>
+              <h3 class="text-xl font-bold text-white mb-2">Society Welfare, Project Production &amp; Discovery</h3>
+              <p class="text-sm text-slate-300 leading-relaxed max-w-3xl">
+                RDIA coordinates six specialized branches across Shri Krishna Heights (Wings A–F). By combining hands-on robotics, autonomous telemetry, logistics, cultural initiatives, and resident welfare, our projects drive practical progress for our apartment complex and surrounding society.
+              </p>
             </div>
-        </section>
-
-        <!-- ========================================================= -->
-        <!-- LATEST PROJECTS SECTION                                   -->
-        <!-- ========================================================= -->
-        <section id="projects" class="py-16 sm:py-24 border-b border-slate-800/70">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
-                    <div>
-                        <span class="font-mono text-xs text-cyan-400 uppercase tracking-widest">02 // LATEST PROJECTS</span>
-                        <h2 class="text-2xl sm:text-4xl font-bold text-white mt-1">Active Systems & Hardware Dossiers</h2>
-                        <p class="text-sm sm:text-base text-slate-400 mt-2 max-w-2xl">
-                            Select any project card to inspect subsystem hardware, operational protocols, and current development status.
-                        </p>
-                    </div>
-
-                    <!-- Status Filter Controls -->
-                    <div class="flex flex-wrap gap-2" id="project-filter-bar">
-                        <button type="button" data-filter="ALL" class="filter-btn px-3.5 py-2 rounded-lg font-mono text-xs font-bold bg-cyan-500 text-navy-950 transition-all">
-                            ALL
-                        </button>
-                        <button type="button" data-filter="ACTIVE" class="filter-btn px-3.5 py-2 rounded-lg font-mono text-xs font-semibold bg-navy-900 text-slate-300 border border-slate-800 hover:border-cyan-500/50 transition-all">
-                            ACTIVE
-                        </button>
-                        <button type="button" data-filter="FIELD TESTING" class="filter-btn px-3.5 py-2 rounded-lg font-mono text-xs font-semibold bg-navy-900 text-slate-300 border border-slate-800 hover:border-amber-500/50 transition-all">
-                            FIELD TESTING
-                        </button>
-                        <button type="button" data-filter="ARCHIVED / HARDWARE" class="filter-btn px-3.5 py-2 rounded-lg font-mono text-xs font-semibold bg-navy-900 text-slate-300 border border-slate-800 hover:border-emerald-500/50 transition-all">
-                            ARCHIVED / HARDWARE
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Project Cards Grid -->
-                <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+            <div class="flex sm:flex-row flex-col gap-3 shrink-0">
+              <div class="px-4 py-3 rounded-lg bg-obsidian border border-slateborder">
+                <p class="font-mono text-[10px] text-slate-500 uppercase">Designation Format</p>
+                <p class="font-mono text-sm font-bold text-cyan-400">[BRANCH]-[TYPE]-[###]</p>
+              </div>
+              <div class="px-4 py-3 rounded-lg bg-obsidian border border-slateborder">
+                <p class="font-mono text-[10px] text-slate-500 uppercase">Branches</p>
+                <p class="font-mono text-sm font-bold text-emerald-400">06 INTEGRATED</p>
+              </div>
             </div>
-        </section>
+          </div>
+        </div>
 
-        <!-- ========================================================= -->
-        <!-- STAFF PORTAL SECTION                                      -->
-        <!-- ========================================================= -->
-        <section id="portal" class="py-16 sm:py-24">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="max-w-xl mx-auto text-center mb-10">
-                    <span class="font-mono text-xs text-emerald-400 uppercase tracking-widest">03 // STAFF PORTAL</span>
-                    <h2 class="text-2xl sm:text-4xl font-bold text-white mt-1">Operative Authentication & Command</h2>
-                    <p class="text-sm text-slate-400 mt-2">
-                        Enter your assigned RDIA operative ID to access command directives and live V-ROV telemetry.
-                    </p>
-                </div>
-
-                <!-- LOCKED LOGIN CARD -->
-                <div id="portal-login-view" class="max-w-lg mx-auto rounded-2xl bg-navy-900/95 border border-slate-800 p-6 sm:p-8 shadow-2xl">
-                    <div class="flex items-center justify-between pb-5 mb-6 border-b border-slate-800">
-                        <div class="flex items-center space-x-2.5 font-mono text-xs text-cyan-400 font-semibold">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                            <span>OPERATIVE ID VERIFICATION</span>
-                        </div>
-                        <span class="font-mono text-[10px] px-2.5 py-1 rounded bg-navy-950 border border-slate-800 text-slate-400">
-                            GATE // LOCKED
-                        </span>
-                    </div>
-
-                    <form id="staff-login-form" class="space-y-5" novalidate autocomplete="off">
-                        <div>
-                            <label for="staff-id-input" class="block font-mono text-xs font-medium text-slate-300 uppercase tracking-wider mb-2">
-                                Assigned Access ID
-                            </label>
-                            <div class="relative">
-                                <input
-                                    type="text"
-                                    id="staff-id-input"
-                                    name="rdia_access_code"
-                                    maxlength="19"
-                                    autocomplete="off"
-                                    autocorrect="off"
-                                    autocapitalize="characters"
-                                    spellcheck="false"
-                                    data-lpignore="true"
-                                    data-form-type="other"
-                                    placeholder="X-R-C-000-0000-0000"
-                                    class="w-full px-4 py-4 rounded-xl bg-navy-950 border border-slate-700 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 text-white font-mono text-base sm:text-lg tracking-widest uppercase placeholder:text-slate-600 focus:outline-none transition-all"
-                                />
-                                <button type="button" id="clear-id-btn" title="Clear ID" class="hidden absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-slate-500 hover:text-slate-300">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
-                            <div class="flex items-center justify-between mt-2 font-mono text-[11px] text-slate-500">
-                                <span>Auto-Format: X-R-C-###-####-####</span>
-                                <span id="char-counter">0 / 19</span>
-                            </div>
-                        </div>
-
-                        <div id="auth-feedback" class="hidden rounded-xl p-3.5 font-mono text-xs"></div>
-
-                        <button type="submit" class="w-full py-3.5 px-5 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-400 hover:from-cyan-400 hover:to-emerald-300 text-navy-950 font-mono text-xs sm:text-sm font-bold tracking-wider uppercase transition-all shadow-lg shadow-cyan-500/15">
-                            AUTHENTICATE & ENTER COMMAND →
-                        </button>
-                    </form>
-                </div>
-
-                <!-- AUTHENTICATED COMMAND DASHBOARD VIEW -->
-                <div id="portal-dashboard-view" class="hidden rounded-2xl bg-navy-900/95 border border-cyan-500/30 p-6 sm:p-8 shadow-2xl space-y-8">
-                    <!-- Top Session Bar -->
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-800">
-                        <div class="flex items-center space-x-4">
-                            <div id="dash-avatar" class="w-12 h-12 rounded-xl bg-cyan-500/15 border border-cyan-400/40 flex items-center justify-center font-mono text-base font-bold text-cyan-300">
-                                PR
-                            </div>
-                            <div>
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <h3 id="dash-name" class="text-xl font-bold text-white">Operative</h3>
-                                    <span id="dash-clearance" class="font-mono text-xs font-bold px-2.5 py-0.5 rounded border bg-amber-500/15 text-amber-400 border-amber-500/40">
-                                        CLEARANCE
-                                    </span>
-                                </div>
-                                <p id="dash-role" class="text-xs sm:text-sm text-slate-400 mt-0.5">Role</p>
-                                <p id="dash-sector" class="font-mono text-[11px] text-cyan-400/90 mt-1">SECTOR</p>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-wrap items-center gap-3">
-                            <button type="button" id="open-add-project-btn" class="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-navy-950 font-mono text-xs font-bold uppercase transition-all inline-flex items-center space-x-1.5 shadow-lg shadow-cyan-500/15">
-                                <span>+ Add Project</span>
-                            </button>
-                            <div class="px-3.5 py-2 rounded-lg bg-navy-950 border border-slate-800 font-mono text-xs text-slate-300">
-                                <span id="dash-session-id" class="text-cyan-400 font-semibold">ID: ---</span>
-                                <span class="text-slate-600 mx-2">|</span>
-                                <span id="dash-session-timer" class="text-emerald-400">UPTIME: 00:00</span>
-                            </div>
-                            <button type="button" id="sign-out-btn" class="px-4 py-2 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/40 text-rose-300 font-mono text-xs font-bold uppercase transition-all">
-                                Lock / Sign Out
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Dashboard Content Grid -->
-                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                        <!-- Directives & Readiness Column -->
-                        <div class="lg:col-span-5 space-y-6">
-                            <div>
-                                <h4 class="font-mono text-xs font-bold text-cyan-400 uppercase tracking-wider mb-3">
-                                    Active Command Directives
-                                </h4>
-                                <div id="dash-directives" class="space-y-3"></div>
-                            </div>
-
-                            <div class="p-4 rounded-xl bg-navy-950 border border-slate-800">
-                                <h4 class="font-mono text-xs font-bold text-emerald-400 uppercase tracking-wider mb-3">
-                                    Subsystem Readiness Matrix
-                                </h4>
-                                <div id="dash-checklist" class="space-y-2 font-mono text-xs"></div>
-                            </div>
-                        </div>
-
-                        <!-- Interactive V-ROV Telemetry Monitor Column -->
-                        <div class="lg:col-span-7 p-5 sm:p-6 rounded-xl bg-navy-950 border border-slate-800 space-y-5">
-                            <div class="flex flex-wrap items-center justify-between gap-2">
-                                <div>
-                                    <span class="font-mono text-[11px] text-amber-400 uppercase tracking-wider">P1 // VICTORIOUS ROV TELEMETRY</span>
-                                    <h4 class="text-lg font-bold text-white">V-ROV Telemetry Monitor & Ultrasonic Bench</h4>
-                                </div>
-                                <span class="font-mono text-[11px] px-2.5 py-1 rounded bg-amber-500/10 border border-amber-500/30 text-amber-300">
-                                    BUZZER ARM: &gt;=75% WATER
-                                </span>
-                            </div>
-
-                            <!-- Simulated I2C 1602 LCD Display -->
-                            <div class="lcd-bezel p-4 rounded-xl border border-slate-800">
-                                <div class="flex items-center justify-between font-mono text-[10px] text-emerald-400/80 mb-2">
-                                    <span>I2C 1602 LCD // ADDR 0x27</span>
-                                    <span id="lcd-alarm-tag" class="font-bold text-slate-400">[STBY]</span>
-                                </div>
-                                <div class="lcd-screen rounded-lg px-4 py-3 font-mono text-sm sm:text-base text-emerald-300 space-y-1 tracking-wide">
-                                    <div id="lcd-line-1">RIVER: N/A  DST: 120cm</div>
-                                    <div id="lcd-line-2">BAT: 11.8V  DRV: READY</div>
-                                </div>
-                            </div>
-
-                            <!-- River Water-Level Feed (Strictly N/A Prior to Field Deployment) -->
-                            <div class="p-4 rounded-xl bg-navy-900 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                <div>
-                                    <div class="font-mono text-[11px] text-slate-400 uppercase">River Water-Level Sensor Feed</div>
-                                    <div id="river-feed-status" class="font-mono text-xs sm:text-sm font-bold text-cyan-300 mt-1">
-                                        WATER LEVEL: N/A — FIELD DEPLOYMENT PENDING
-                                    </div>
-                                </div>
-                                <div class="font-mono text-xs px-3 py-1.5 rounded-lg bg-navy-950 border border-slate-800 text-slate-300 shrink-0">
-                                    LEVEL: <span id="water-level-readout" class="text-white font-bold">N/A</span>
-                                </div>
-                            </div>
-
-                            <!-- Ultrasonic Obstacle Distance & Ping Controls -->
-                            <div class="space-y-3 pt-1">
-                                <div class="grid grid-cols-3 gap-3">
-                                    <div class="p-3 rounded-lg bg-navy-900 border border-slate-800">
-                                        <div class="font-mono text-[10px] text-slate-400">HC-SR04 SONAR</div>
-                                        <div id="telemetry-sonar" class="font-mono text-sm font-bold text-white mt-0.5">120 cm</div>
-                                    </div>
-                                    <div class="p-3 rounded-lg bg-navy-900 border border-slate-800">
-                                        <div class="font-mono text-[10px] text-slate-400">DRIVE BUS</div>
-                                        <div class="font-mono text-sm font-bold text-emerald-400 mt-0.5">L298N TANK</div>
-                                    </div>
-                                    <button type="button" id="ping-sonar-btn" class="p-3 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/40 text-cyan-300 font-mono text-xs font-bold transition-all text-center">
-                                        PING SONAR
-                                    </button>
-                                </div>
-
-                                <div class="p-4 rounded-lg bg-navy-900/90 border border-slate-800 space-y-2.5">
-                                    <div class="flex items-center justify-between font-mono text-[11px]">
-                                        <span class="text-slate-400 uppercase">Ultrasonic Obstacle Distance</span>
-                                        <span id="sonar-clearance-status" class="text-emerald-400 font-semibold">PATH CLEAR (&gt;35cm)</span>
-                                    </div>
-                                    <input id="sonar-distance-slider" type="range" min="10" max="250" value="120" class="w-full accent-cyan-400 cursor-pointer" />
-                                    <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
-                                        <button type="button" id="sonar-close-btn" class="px-3 py-1.5 rounded bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 font-mono text-[10px] font-bold uppercase transition-all">
-                                            Simulate Close Obstacle (22cm)
-                                        </button>
-                                        <button type="button" id="sonar-clear-btn" class="px-3 py-1.5 rounded bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 font-mono text-[10px] font-bold uppercase transition-all">
-                                            Reset Clear (140cm)
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Dedicated Research Objects Sector -->
-                    <div id="research-objects-sector" class="pt-6 border-t border-slate-800 space-y-5">
-                        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
-                            <div>
-                                <span class="font-mono text-xs text-cyan-400 uppercase tracking-widest">RESEARCH OBJECTS SECTOR // LAB & FIELD INVENTORY</span>
-                                <h4 class="text-xl font-bold text-white mt-1">Research Objects & Hardware Test Registry</h4>
-                                <p class="text-xs sm:text-sm text-slate-400 mt-1">
-                                    Inspect sensors, motor drivers, display modules, airframe/payload units, and field gear supporting Shri Krishna Heights innovation projects.
-                                </p>
-                            </div>
-
-                            <!-- Category Filter Pills for Research Objects -->
-                            <div class="flex flex-wrap gap-2" id="research-object-filters">
-                                <button type="button" data-obj-filter="ALL" class="obj-filter-btn px-3 py-1.5 rounded-lg font-mono text-[11px] font-bold bg-cyan-500 text-navy-950 transition-all">
-                                    ALL OBJECTS
-                                </button>
-                                <button type="button" data-obj-filter="SENSORS" class="obj-filter-btn px-3 py-1.5 rounded-lg font-mono text-[11px] font-semibold bg-navy-950 text-slate-300 border border-slate-800 hover:border-cyan-500/40 transition-all">
-                                    SENSORS
-                                </button>
-                                <button type="button" data-obj-filter="MODULES" class="obj-filter-btn px-3 py-1.5 rounded-lg font-mono text-[11px] font-semibold bg-navy-950 text-slate-300 border border-slate-800 hover:border-cyan-500/40 transition-all">
-                                    MODULES
-                                </button>
-                                <button type="button" data-obj-filter="PROTOTYPES" class="obj-filter-btn px-3 py-1.5 rounded-lg font-mono text-[11px] font-semibold bg-navy-950 text-slate-300 border border-slate-800 hover:border-amber-500/40 transition-all">
-                                    PROTOTYPES
-                                </button>
-                                <button type="button" data-obj-filter="FIELD GEAR" class="obj-filter-btn px-3 py-1.5 rounded-lg font-mono text-[11px] font-semibold bg-navy-950 text-slate-300 border border-slate-800 hover:border-emerald-500/40 transition-all">
-                                    FIELD GEAR
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                            <!-- Research Objects List -->
-                            <div id="research-objects-grid" class="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-
-                            <!-- Selected Research Object Inspector -->
-                            <div id="research-object-inspector" class="lg:col-span-4 p-5 rounded-xl bg-navy-950 border border-slate-800 flex flex-col justify-between space-y-4">
-                                <div class="space-y-3">
-                                    <div class="flex items-center justify-between gap-2">
-                                        <span id="insp-obj-code" class="font-mono text-[11px] text-cyan-400 font-bold">OBJ-001</span>
-                                        <span id="insp-obj-status" class="font-mono text-[10px] font-bold px-2 py-0.5 rounded border bg-emerald-500/15 text-emerald-400 border-emerald-500/40">
-                                            READY
-                                        </span>
-                                    </div>
-                                    <div>
-                                        <div id="insp-obj-category" class="font-mono text-[10px] text-slate-500 uppercase">CATEGORY</div>
-                                        <h5 id="insp-obj-name" class="text-lg font-bold text-white mt-0.5">Select a Research Object</h5>
-                                    </div>
-                                    <p id="insp-obj-notes" class="text-xs text-slate-300 leading-relaxed">
-                                        Choose any item from the Research Objects registry to view technical notes, assigned project link, and bench status.
-                                    </p>
-                                </div>
-                                <div class="pt-3 border-t border-slate-800/90 space-y-2 font-mono text-xs">
-                                    <div class="flex items-center justify-between gap-2">
-                                        <span class="text-slate-500">ASSIGNED PROJECT</span>
-                                        <span id="insp-obj-project" class="text-cyan-300 font-semibold text-right">---</span>
-                                    </div>
-                                    <div class="flex items-center justify-between gap-2">
-                                        <span class="text-slate-500">SPEC / INTERFACE</span>
-                                        <span id="insp-obj-spec" class="text-slate-300 text-right">---</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <!-- 6 Operational Branches Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Branch R -->
+          <div class="glass-card rounded-xl p-6">
+            <div class="flex items-center justify-between mb-4">
+              <span class="font-mono text-xs font-bold text-cyan-400 px-2.5 py-1 rounded bg-cyan-500/10 border border-cyan-500/20">BRANCH [R]</span>
+              <span class="font-mono text-xs text-slate-400">ACS CLEARANCE</span>
             </div>
-        </section>
-    </main>
+            <h3 class="text-lg font-bold text-white mb-2">Research</h3>
+            <p class="text-sm text-slate-400 leading-relaxed">
+              Experimental discovery, sensor telemetry, ultrasonic &amp; river monitoring platforms, aerial/ground robotics, and SCP-ACS documented research initiatives.
+            </p>
+          </div>
 
-    <!-- ========================================================= -->
-    <!-- ADD PROJECT MODAL (STAFF PORTAL)                          -->
-    <!-- ========================================================= -->
-    <div id="add-project-modal" class="hidden fixed inset-0 z-50 bg-navy-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="w-full max-w-2xl rounded-2xl bg-navy-900 border border-cyan-500/40 shadow-2xl overflow-hidden">
-            <div class="px-6 py-4 bg-navy-950 border-b border-slate-800 flex items-center justify-between">
-                <div class="flex items-center space-x-2.5">
-                    <span class="font-mono text-xs font-bold text-cyan-400 uppercase">STAFF PORTAL // NEW PROJECT ENTRY</span>
-                </div>
-                <button type="button" id="close-add-project-btn" aria-label="Close Add Project Modal" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-navy-800">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
+          <!-- Branch D -->
+          <div class="glass-card rounded-xl p-6">
+            <div class="flex items-center justify-between mb-4">
+              <span class="font-mono text-xs font-bold text-emerald-400 px-2.5 py-1 rounded bg-emerald-500/10 border border-emerald-500/20">BRANCH [D]</span>
+              <span class="font-mono text-xs text-slate-400">PROTOTYPING</span>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2">Development</h3>
+            <p class="text-sm text-slate-400 leading-relaxed">
+              Hardware assembly, chassis engineering, motor driver circuits, embedded microcontroller firmware, and production build execution.
+            </p>
+          </div>
+
+          <!-- Branch I -->
+          <div class="glass-card rounded-xl p-6">
+            <div class="flex items-center justify-between mb-4">
+              <span class="font-mono text-xs font-bold text-indigo-400 px-2.5 py-1 rounded bg-indigo-500/10 border border-indigo-500/20">BRANCH [I]</span>
+              <span class="font-mono text-xs text-slate-400">INTEL &amp; DEFENCE</span>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2">Intelligence (incl. Defence)</h3>
+            <p class="text-sm text-slate-400 leading-relaxed">
+              Unified intelligence and defence division handling reconnaissance data, environmental hazard alerts, perimeter safety, and operational security.
+            </p>
+          </div>
+
+          <!-- Branch L -->
+          <div class="glass-card rounded-xl p-6">
+            <div class="flex items-center justify-between mb-4">
+              <span class="font-mono text-xs font-bold text-amber-400 px-2.5 py-1 rounded bg-amber-500/10 border border-amber-500/20">BRANCH [L]</span>
+              <span class="font-mono text-xs text-slate-400">SUPPLY &amp; OPS</span>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2">Logistics</h3>
+            <p class="text-sm text-slate-400 leading-relaxed">
+              Component procurement, inventory tracking, field deployment transport across Badlapur, and resource allocation for Wings A–F.
+            </p>
+          </div>
+
+          <!-- Branch C -->
+          <div class="glass-card rounded-xl p-6">
+            <div class="flex items-center justify-between mb-4">
+              <span class="font-mono text-xs font-bold text-pink-400 px-2.5 py-1 rounded bg-pink-500/10 border border-pink-500/20">BRANCH [C]</span>
+              <span class="font-mono text-xs text-slate-400">COMMUNITY</span>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2">Cultural Committee</h3>
+            <p class="text-sm text-slate-400 leading-relaxed">
+              Organizing Shri Krishna Heights society events, youth innovation showcases, collaborative workshops, and resident engagement programs.
+            </p>
+          </div>
+
+          <!-- Branch W -->
+          <div class="glass-card rounded-xl p-6">
+            <div class="flex items-center justify-between mb-4">
+              <span class="font-mono text-xs font-bold text-teal-400 px-2.5 py-1 rounded bg-teal-500/10 border border-teal-500/20">BRANCH [W]</span>
+              <span class="font-mono text-xs text-slate-400">SOCIETY CARE</span>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2">Welfare</h3>
+            <p class="text-sm text-slate-400 leading-relaxed">
+              Direct resident welfare initiatives, sustainable complex infrastructure (such as solar lighting), and civic improvements for society development.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LATEST PROJECTS REPOSITORY -->
+    <section id="projects" class="py-20 border-b border-slateborder/70">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+          <div>
+            <p class="font-mono text-xs text-emerald-400 tracking-widest uppercase mb-2">// 02. ACTIVE R&amp;D &amp; SOCIETY INITIATIVES</p>
+            <h2 class="text-3xl font-bold text-white">Latest RDIA Projects</h2>
+          </div>
+
+          <!-- Filter Controls -->
+          <div class="flex flex-wrap gap-2" id="project-filters">
+            <button data-filter="ALL" class="filter-btn active font-mono text-xs px-3.5 py-2 rounded-lg bg-cyan-500 text-slate-950 font-semibold transition">ALL</button>
+            <button data-filter="ACTIVE" class="filter-btn font-mono text-xs px-3.5 py-2 rounded-lg bg-slatepanel border border-slateborder text-slate-300 hover:border-cyan-500/40 transition">ACTIVE</button>
+            <button data-filter="FIELD TESTING" class="filter-btn font-mono text-xs px-3.5 py-2 rounded-lg bg-slatepanel border border-slateborder text-slate-300 hover:border-cyan-500/40 transition">FIELD TESTING</button>
+            <button data-filter="RESEARCH ACS" class="filter-btn font-mono text-xs px-3.5 py-2 rounded-lg bg-slatepanel border border-slateborder text-slate-300 hover:border-cyan-500/40 transition">RESEARCH ACS</button>
+          </div>
+        </div>
+
+        <!-- Projects Grid -->
+        <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Dynamically populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- STAFF PORTAL SECTION -->
+    <section id="staff-portal" class="py-20">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-10">
+          <p class="font-mono text-xs text-cyan-400 tracking-widest uppercase mb-2">// 03. OPERATIVE AUTHENTICATION GATEWAY</p>
+          <h2 class="text-3xl font-bold text-white">RDIA Staff &amp; Research Portal</h2>
+          <p class="text-sm text-slate-400 mt-2">
+            Authenticate using your 6-segment Shri Krishna Heights Operative ID (<span class="font-mono text-slate-300">Rank-Branch-Wing-Flat-Phone-UIN</span>). Research (<span class="font-mono text-cyan-400">R</span>) operatives unlock ACS project registration.
+          </p>
+        </div>
+
+        <!-- LOCKED / LOGIN STATE -->
+        <div id="portal-login-view" class="max-w-xl mx-auto">
+          <div id="login-card" class="glass-card rounded-2xl p-6 sm:p-8 border border-slateborder relative overflow-hidden">
+            <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-cyan-500 via-emerald-400 to-cyan-500"></div>
+
+            <div class="flex items-center justify-between mb-6">
+              <div class="flex items-center gap-2.5">
+                <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <span class="font-mono text-xs font-bold tracking-wider uppercase text-white">Operative ID Verification</span>
+              </div>
+              <span class="font-mono text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">SKH-421503</span>
             </div>
 
-            <form id="add-project-form" class="p-6 space-y-4 max-h-[82vh] overflow-y-auto" novalidate>
-                <div id="add-project-feedback" class="hidden rounded-xl p-3 font-mono text-xs bg-rose-500/10 border border-rose-500/40 text-rose-300"></div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label for="new-proj-title" class="block font-mono text-xs text-slate-300 uppercase mb-1.5">Project Title *</label>
-                        <input type="text" id="new-proj-title" required placeholder="e.g., Society Rainwater Smart Valve" class="w-full px-3.5 py-2.5 rounded-lg bg-navy-950 border border-slate-700 focus:border-cyan-400 text-sm text-white placeholder:text-slate-600 focus:outline-none" />
-                    </div>
-                    <div>
-                        <label for="new-proj-priority" class="block font-mono text-xs text-slate-300 uppercase mb-1.5">Priority / Tag *</label>
-                        <input type="text" id="new-proj-priority" required placeholder="e.g., P1 — SOCIETY WELFARE" class="w-full px-3.5 py-2.5 rounded-lg bg-navy-950 border border-slate-700 focus:border-cyan-400 text-sm text-white font-mono placeholder:text-slate-600 focus:outline-none" />
-                    </div>
+            <form id="staff-login-form" class="space-y-5" autocomplete="off">
+              <div>
+                <label for="staff-id-input" class="block font-mono text-xs text-slate-400 uppercase mb-2">
+                  Assigned 6-Segment Operative ID
+                </label>
+                <input
+                  type="text"
+                  id="staff-id-input"
+                  name="rdia_operative_token"
+                  maxlength="20"
+                  placeholder="Rank-Branch-Wing-Flat-Phone-UIN"
+                  autocomplete="off"
+                  autocorrect="off"
+                  autocapitalize="off"
+                  spellcheck="false"
+                  class="w-full font-mono text-base sm:text-lg tracking-wider px-4 py-3.5 rounded-xl bg-obsidian border border-slateborder focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 text-white placeholder-slate-600 outline-none transition"
+                />
+                <div class="mt-2.5 p-3 rounded-lg bg-obsidian/90 border border-slateborder/80 space-y-1.5">
+                  <div class="flex justify-between text-[11px] font-mono text-slate-400">
+                    <span>SCHEMA: <span class="text-cyan-400">[Rank]-[Branch]-[Wing]-[Flat]-[Phone4]-[UIN4]</span></span>
+                    <span id="char-counter">0 / 19</span>
+                  </div>
+                  <p class="text-[10px] font-mono text-slate-500 leading-relaxed">
+                    Ranks: <span class="text-slate-300">A</span> (Admin, 5 max) • <span class="text-slate-300">MX</span> (Mod) • <span class="text-slate-300">C</span> (Co-ord) • <span class="text-slate-300">M</span> (Manager) • <span class="text-slate-300">m</span> (member) &nbsp;|&nbsp; Branches: <span class="text-slate-300">R, D, I, L, C, W</span> &nbsp;|&nbsp; Wings: <span class="text-slate-300">A–F</span>
+                  </p>
                 </div>
+              </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label for="new-proj-status" class="block font-mono text-xs text-slate-300 uppercase mb-1.5">Status Filter Group *</label>
-                        <select id="new-proj-status" class="w-full px-3.5 py-2.5 rounded-lg bg-navy-950 border border-slate-700 focus:border-cyan-400 text-sm text-white font-mono focus:outline-none">
-                            <option value="ACTIVE">ACTIVE</option>
-                            <option value="FIELD TESTING">FIELD TESTING</option>
-                            <option value="ARCHIVED / HARDWARE">ARCHIVED / HARDWARE</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="new-proj-sector" class="block font-mono text-xs text-slate-300 uppercase mb-1.5">Branch / Sector *</label>
-                        <select id="new-proj-sector" class="w-full px-3.5 py-2.5 rounded-lg bg-navy-950 border border-slate-700 focus:border-cyan-400 text-sm text-white font-mono focus:outline-none">
-                            <option value="HQ Oversight • Shri Krishna Heights">HQ Oversight • Shri Krishna Heights</option>
-                            <option value="Research Sector">Research Sector</option>
-                            <option value="Development Sector">Development Sector</option>
-                            <option value="Intelligence Sector">Intelligence Sector</option>
-                            <option value="Defence Sector">Defence Sector</option>
-                        </select>
-                    </div>
-                </div>
+              <!-- Error Alert -->
+              <div id="login-error" class="hidden p-3.5 rounded-lg bg-red-500/10 border border-red-500/40 text-red-300 font-mono text-xs flex items-start gap-2.5">
+                <svg class="w-4 h-4 text-red-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span id="login-error-text">ACCESS DENIED: Invalid Operative ID.</span>
+              </div>
 
-                <div>
-                    <label for="new-proj-subtitle" class="block font-mono text-xs text-slate-300 uppercase mb-1.5">Subtitle / System Scope</label>
-                    <input type="text" id="new-proj-subtitle" placeholder="e.g., Automated Tank & Courtyard Utility Controller" class="w-full px-3.5 py-2.5 rounded-lg bg-navy-950 border border-slate-700 focus:border-cyan-400 text-sm text-white placeholder:text-slate-600 focus:outline-none" />
-                </div>
-
-                <div>
-                    <label for="new-proj-summary" class="block font-mono text-xs text-slate-300 uppercase mb-1.5">Summary & Society Impact *</label>
-                    <textarea id="new-proj-summary" rows="3" required placeholder="Describe how this project supports innovation and welfare at Shri Krishna Heights, Hendrepada Badlapur 421503..." class="w-full px-3.5 py-2.5 rounded-lg bg-navy-950 border border-slate-700 focus:border-cyan-400 text-sm text-white placeholder:text-slate-600 focus:outline-none"></textarea>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label for="new-proj-hardware" class="block font-mono text-xs text-slate-300 uppercase mb-1.5">Hardware / Components (1 per line)</label>
-                        <textarea id="new-proj-hardware" rows="3" placeholder="ESP32 / Sensor Node&#10;Relay & Enclosure&#10;Status Indicator" class="w-full px-3.5 py-2 rounded-lg bg-navy-950 border border-slate-700 focus:border-cyan-400 text-xs text-white font-mono placeholder:text-slate-600 focus:outline-none"></textarea>
-                    </div>
-                    <div>
-                        <label for="new-proj-notes" class="block font-mono text-xs text-slate-300 uppercase mb-1.5">Protocols & Field Notes (1 per line)</label>
-                        <textarea id="new-proj-notes" rows="3" placeholder="Safety & voltage check&#10;Shri Krishna Heights bench trial" class="w-full px-3.5 py-2 rounded-lg bg-navy-950 border border-slate-700 focus:border-cyan-400 text-xs text-white font-mono placeholder:text-slate-600 focus:outline-none"></textarea>
-                    </div>
-                </div>
-
-                <div class="pt-3 border-t border-slate-800 flex items-center justify-end gap-3">
-                    <button type="button" id="cancel-add-project-btn" class="px-4 py-2.5 rounded-lg bg-navy-950 hover:bg-navy-800 border border-slate-700 text-slate-300 font-mono text-xs font-semibold uppercase transition-all">
-                        Cancel
-                    </button>
-                    <button type="submit" class="px-5 py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-emerald-400 hover:from-cyan-400 hover:to-emerald-300 text-navy-950 font-mono text-xs font-bold uppercase transition-all">
-                        Save Project to Repository
-                    </button>
-                </div>
+              <button
+                type="submit"
+                class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 font-mono font-bold text-xs tracking-widest uppercase transition shadow-lg shadow-cyan-500/20"
+              >
+                Authenticate &amp; Decode ID &rarr;
+              </button>
             </form>
+          </div>
         </div>
-    </div>
 
-    <!-- ========================================================= -->
-    <!-- PROJECT DOSSIER / TECH SPECS MODAL                        -->
-    <!-- ========================================================= -->
-    <div id="project-modal" class="hidden fixed inset-0 z-50 bg-navy-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="w-full max-w-2xl rounded-2xl bg-navy-900 border border-slate-700 shadow-2xl overflow-hidden">
-            <div class="px-6 py-4 bg-navy-950 border-b border-slate-800 flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <span id="modal-code" class="font-mono text-xs text-slate-400">CODE</span>
-                    <span id="modal-priority" class="font-mono text-xs font-bold px-2.5 py-0.5 rounded border">PRIORITY</span>
+        <!-- UNLOCKED / AUTHENTICATED STAFF DASHBOARD -->
+        <div id="portal-dashboard-view" class="hidden space-y-6">
+          <!-- Operative Profile & Decoded ID Header -->
+          <div class="glass-card rounded-2xl p-6 border border-emerald-500/40 bg-emerald-950/10">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slateborder/80">
+              <div class="flex items-start sm:items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center shrink-0">
+                  <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
                 </div>
-                <button type="button" id="close-modal-btn" aria-label="Close Modal" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-navy-800">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-
-            <div class="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
                 <div>
-                    <h3 id="modal-title" class="text-2xl font-bold text-white">Project Title</h3>
-                    <p id="modal-sector" class="font-mono text-xs text-cyan-400 mt-1">Subtitle // Sector</p>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="font-mono text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">SESSION VERIFIED</span>
+                    <span id="dash-id" class="font-mono text-xs text-cyan-400"></span>
+                  </div>
+                  <h3 id="dash-name" class="text-xl font-bold text-white mt-1"></h3>
+                  <p id="dash-role" class="text-xs font-mono text-slate-400 mt-0.5"></p>
                 </div>
+              </div>
 
-                <p id="modal-summary" class="text-sm text-slate-300 leading-relaxed"></p>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="p-4 rounded-xl bg-navy-950 border border-slate-800">
-                        <h4 class="font-mono text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2.5">Hardware & Architecture</h4>
-                        <ul id="modal-bom" class="space-y-2 text-xs text-slate-300 font-mono"></ul>
-                    </div>
-
-                    <div class="p-4 rounded-xl bg-navy-950 border border-slate-800">
-                        <h4 class="font-mono text-xs font-bold text-cyan-400 uppercase tracking-wider mb-2.5">Operational Protocols & Roadmap</h4>
-                        <ul id="modal-protocols" class="space-y-2 text-xs text-slate-300 font-mono"></ul>
-                    </div>
-                </div>
-
-                <div class="p-3.5 rounded-xl bg-navy-950 border border-slate-800 flex items-center justify-between gap-4">
-                    <span class="font-mono text-[11px] text-slate-400 uppercase">Current Status</span>
-                    <span id="modal-status" class="font-mono text-xs font-bold text-amber-300 text-right"></span>
-                </div>
-            </div>
-
-            <div class="px-6 py-4 bg-navy-950 border-t border-slate-800 flex justify-end">
-                <button type="button" id="modal-done-btn" class="px-5 py-2.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-navy-950 font-mono text-xs font-bold uppercase transition-all">
-                    Close Dossier
+              <div class="flex flex-wrap items-center gap-3">
+                <!-- Research-Gated Add Research Project Button -->
+                <button
+                  id="btn-open-acs-modal"
+                  onclick="openAcsModal()"
+                  class="hidden px-4 py-2.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-mono text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-cyan-500/20"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>+ ADD RESEARCH PROJECT (ACS)</span>
                 </button>
+
+                <!-- Notice for non-Research branches -->
+                <div id="non-research-notice" class="hidden px-3.5 py-2 rounded-lg bg-slatepanel border border-slateborder font-mono text-[11px] text-slate-400">
+                  RESEARCH BRANCH [R] REQUIRED TO ADD RESEARCH PROJECTS
+                </div>
+
+                <button
+                  id="logout-btn"
+                  class="px-4 py-2.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-300 font-mono text-xs transition flex items-center gap-2"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  <span>LOCK PORTAL</span>
+                </button>
+              </div>
             </div>
+
+            <!-- 6-Segment Decoded Operative Breakdown -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-4">
+              <div class="p-2.5 rounded-lg bg-obsidian/90 border border-slateborder">
+                <p class="font-mono text-[10px] text-slate-500 uppercase">1. Rank</p>
+                <p id="dec-rank" class="font-mono text-xs font-bold text-amber-400 mt-0.5"></p>
+              </div>
+              <div class="p-2.5 rounded-lg bg-obsidian/90 border border-slateborder">
+                <p class="font-mono text-[10px] text-slate-500 uppercase">2. Branch</p>
+                <p id="dec-branch" class="font-mono text-xs font-bold text-cyan-400 mt-0.5"></p>
+              </div>
+              <div class="p-2.5 rounded-lg bg-obsidian/90 border border-slateborder">
+                <p class="font-mono text-[10px] text-slate-500 uppercase">3. Building Wing</p>
+                <p id="dec-wing" class="font-mono text-xs font-bold text-white mt-0.5"></p>
+              </div>
+              <div class="p-2.5 rounded-lg bg-obsidian/90 border border-slateborder">
+                <p class="font-mono text-[10px] text-slate-500 uppercase">4. Flat No.</p>
+                <p id="dec-flat" class="font-mono text-xs font-bold text-white mt-0.5"></p>
+              </div>
+              <div class="p-2.5 rounded-lg bg-obsidian/90 border border-slateborder">
+                <p class="font-mono text-[10px] text-slate-500 uppercase">5. Phone Suffix</p>
+                <p id="dec-phone" class="font-mono text-xs font-bold text-slate-300 mt-0.5"></p>
+              </div>
+              <div class="p-2.5 rounded-lg bg-obsidian/90 border border-slateborder">
+                <p class="font-mono text-[10px] text-slate-500 uppercase">6. UIN</p>
+                <p id="dec-uin" class="font-mono text-xs font-bold text-emerald-400 mt-0.5"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- RESEARCH OBJECTS SECTOR -->
+          <div class="glass-card rounded-xl p-6 border border-cyan-500/30">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-cyan-400 live-dot"></span>
+                  <h4 class="font-mono text-xs font-bold text-cyan-400 uppercase tracking-wider">SECTOR: RESEARCH OBJECTS &amp; HARDWARE INVENTORY</h4>
+                </div>
+                <p class="text-xs text-slate-400 mt-1">Inspect active sensors, microcontrollers, actuators, and experimental field units registered to RDIA.</p>
+              </div>
+
+              <!-- Object Category Filter -->
+              <div class="flex flex-wrap gap-1.5" id="object-filters">
+                <button data-obj-filter="ALL" class="obj-filter-btn font-mono text-[11px] px-2.5 py-1.5 rounded bg-cyan-500 text-slate-950 font-bold transition">ALL OBJECTS</button>
+                <button data-obj-filter="SENSORS" class="obj-filter-btn font-mono text-[11px] px-2.5 py-1.5 rounded bg-obsidian border border-slateborder text-slate-300 hover:border-cyan-500/40 transition">SENSORS</button>
+                <button data-obj-filter="MODULES" class="obj-filter-btn font-mono text-[11px] px-2.5 py-1.5 rounded bg-obsidian border border-slateborder text-slate-300 hover:border-cyan-500/40 transition">MODULES</button>
+                <button data-obj-filter="PROTOTYPES" class="obj-filter-btn font-mono text-[11px] px-2.5 py-1.5 rounded bg-obsidian border border-slateborder text-slate-300 hover:border-cyan-500/40 transition">PROTOTYPES</button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <!-- Objects Cards Grid -->
+              <div id="research-objects-grid" class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <!-- Populated by JS -->
+              </div>
+
+              <!-- Selected Research Object Inspector -->
+              <div class="p-4 rounded-xl bg-obsidian border border-slateborder flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between border-b border-slateborder pb-2.5 mb-3">
+                    <span class="font-mono text-[10px] text-cyan-400 uppercase">OBJECT TELEMETRY INSPECTOR</span>
+                    <span id="insp-obj-id" class="font-mono text-[11px] text-slate-400">OBJ-001</span>
+                  </div>
+                  <h5 id="insp-obj-name" class="text-base font-bold text-white mb-1">HC-SR04 Ultrasonic Array</h5>
+                  <span id="insp-obj-status" class="inline-block font-mono text-[10px] px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 mb-3">CALIBRATED • BENCH READY</span>
+                  <p id="insp-obj-desc" class="text-xs text-slate-300 leading-relaxed mb-4">
+                    Dual-transducer 40kHz acoustic rangefinder mounted on Victorious ROV front bumper for autonomous obstacle avoidance (2cm–400cm range).
+                  </p>
+                  <div class="space-y-1.5 border-t border-slateborder/80 pt-3 font-mono text-[11px]">
+                    <div class="flex justify-between">
+                      <span class="text-slate-500">ASSIGNED UNIT:</span>
+                      <span id="insp-obj-unit" class="text-slate-200">R-G-001 (V-ROV)</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-slate-500">INTERFACE:</span>
+                      <span id="insp-obj-bus" class="text-cyan-400">5V TTL Trig/Echo</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-slate-500">CUSTODIAN BRANCH:</span>
+                      <span id="insp-obj-branch" class="text-amber-400">Research [R]</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slateborder/80 text-[10px] font-mono text-slate-500">
+                  SELECT ANY OBJECT CARD TO INSPECT PARAMETERS
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dashboard Grid: Directives + V-ROV Live Telemetry Monitor -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left 2 Columns: Directives & Project Queue -->
+            <div class="lg:col-span-2 space-y-6">
+              <!-- Branch Directives -->
+              <div class="glass-card rounded-xl p-6">
+                <h4 class="font-mono text-xs font-bold text-cyan-400 uppercase tracking-wider mb-4">// ACTIVE BRANCH DIRECTIVES</h4>
+                <div id="dash-directives" class="space-y-3">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+
+              <!-- Registered Research & Society Projects -->
+              <div class="glass-card rounded-xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <h4 class="font-mono text-xs font-bold text-emerald-400 uppercase tracking-wider">// REGISTERED ACS &amp; SOCIETY ARCHIVE</h4>
+                  <span id="dash-project-count" class="font-mono text-[11px] text-slate-400">04 ITEMS</span>
+                </div>
+                <div id="dash-project-list" class="space-y-2.5">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Interactive V-ROV I2C Telemetry & River Monitor -->
+            <div class="glass-card rounded-xl p-6 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-3">
+                  <h4 class="font-mono text-xs font-bold text-emerald-400 uppercase tracking-wider">// V-ROV [R-G-001] TELEMETRY</h4>
+                  <span class="font-mono text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">I2C 1602 LCD</span>
+                </div>
+                <p class="text-xs text-slate-400 mb-4">
+                  Simulate HC-SR04 obstacle detection on Victorious ROV. River water-level feed remains <span class="font-mono text-slate-300">N/A</span> until field deployment.
+                </p>
+
+                <!-- Simulated 16x2 I2C LCD Display -->
+                <div class="lcd-screen rounded-lg p-4 font-mono text-sm tracking-widest mb-5 select-none">
+                  <div id="lcd-line-1" class="truncate">DIST: 142cm  OK</div>
+                  <div id="lcd-line-2" class="truncate mt-1">RIVER: N/A</div>
+                </div>
+
+                <!-- Controls -->
+                <div class="space-y-4">
+                  <div>
+                    <div class="flex justify-between font-mono text-xs mb-1">
+                      <span class="text-slate-400">HC-SR04 Ultrasonic Obstacle:</span>
+                      <span id="sim-dist-val" class="text-cyan-400 font-bold">142 cm</span>
+                    </div>
+                    <input id="sim-dist-slider" type="range" min="5" max="300" value="142" class="w-full accent-cyan-400 cursor-pointer" />
+                  </div>
+
+                  <div class="p-3 rounded-lg bg-obsidian border border-slateborder flex items-center justify-between">
+                    <span class="font-mono text-xs text-slate-400">River Water Level Feed:</span>
+                    <span class="font-mono text-xs font-bold text-slate-300 px-2 py-0.5 rounded bg-slate-800 border border-slate-700">N/A — DEPLOYMENT PENDING</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-6 pt-4 border-t border-slateborder flex items-center justify-between font-mono text-[11px] text-slate-400">
+                <span>MOTOR DRIVER: L298N</span>
+                <span class="text-cyan-400">SKH NODE: ONLINE</span>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-slateborder bg-obsidian py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-slate-500">
+      <div>
+        <span class="text-slate-300 font-semibold">RDIA</span> • Shri Krishna Heights, Hendrepada, Badlapur 421503
+      </div>
+      <div>
+        WINGS A–F • BRANCHES: R • D • I • L • C • W
+      </div>
     </div>
-
-    <!-- ========================================================= -->
-    <!-- INLINE APPLICATION SCRIPT                                 -->
-    <!-- ========================================================= -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const PROJECTS_STORAGE_KEY = 'rdia_skh_projects_v1';
-
-            // -----------------------------------------------------
-            // 1. RDIA PROJECTS REPOSITORY DATA (WITH LOCALSTORAGE)
-            // -----------------------------------------------------
-            const DEFAULT_PROJECTS_DATA = [
-                {
-                    id: 'v-rov',
-                    code: 'RDIA-PRJ-01 // V-ROV',
-                    statusCategory: 'FIELD TESTING',
-                    priorityBadge: 'P1 — VICTORIOUS ROV (V-ROV)',
-                    badgeStyle: 'bg-amber-500/15 text-amber-400 border-amber-500/40',
-                    title: 'Victorious ROV (V-ROV)',
-                    subtitle: 'Ground-Based Remotely Operated Vehicle & River Monitoring Rover',
-                    sector: 'HQ Oversight • Shri Krishna Heights (R, D, I, Def)',
-                    summary: 'Ground-based Remotely Operated Vehicle featuring L298N + BO gearmotor tank-style differential steering, HC-SR04 ultrasonic obstacle detection, I2C 1602 LCD telemetry, IR remote control, river water-level monitoring with audible buzzer alarms, and a computer vision roadmap.',
-                    bom: [
-                        'Drive: L298N Dual H-Bridge + BO Gearmotors (Tank Differential)',
-                        'Obstacle & River: HC-SR04 Ultrasonic + River Water-Level Sensor',
-                        'Alert & Display: Audible Buzzer Alarm + I2C 1602 LCD Telemetry',
-                        'Control & Vision: IR Remote Control + Computer Vision Roadmap'
-                    ],
-                    protocols: [
-                        'Tank-style differential steering via left/right BO gearmotor pairs',
-                        'HC-SR04 ultrasonic obstacle detection with IR manual override',
-                        'I2C 1602 LCD live status readout (RIVER: N/A prior to deployment)',
-                        'Audible buzzer alarm armed for river water-level threshold alerts',
-                        'Planned computer vision stage for autonomous target & path cues'
-                    ],
-                    status: 'FIELD TESTING — V-ROV BENCH & RIVER TELEMETRY VALIDATION'
-                },
-                {
-                    id: 'dual-drone',
-                    code: 'RDIA-PRJ-02 // DUAL-UAV',
-                    statusCategory: 'ACTIVE',
-                    priorityBadge: 'P2 — COOPERATIVE DUAL-DRONE (270G)',
-                    badgeStyle: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/40',
-                    title: 'Cooperative Dual-Drone Payload System',
-                    subtitle: 'Sub-250g Dual-Carrier Modular Payload Transport (2x 100g + 70g = 270g)',
-                    sector: 'Research & Development Sectors',
-                    summary: 'Sub-250g dual-carrier modular payload transport architecture combining two 100g carrier airframes with a 70g modular payload module for a 270g total system mass.',
-                    bom: [
-                        'Carrier A: 100g Sub-250g Class Airframe',
-                        'Carrier B: 100g Sub-250g Class Airframe',
-                        'Payload Bay: 70g Modular Sensor / Cargo Unit',
-                        'Total System Mass: 2x 100g + 70g = 270g Combined'
-                    ],
-                    protocols: [
-                        'Coordinated dual-carrier lift & load sharing across 270g total mass',
-                        'Modular payload mount supporting mission-specific sensor swaps',
-                        'Controlled formation stability & pre-flight weight verification'
-                    ],
-                    status: 'ACTIVE — DUAL-CARRIER LOAD & FLIGHT BALANCING'
-                },
-                {
-                    id: 'glider-launcher',
-                    code: 'RDIA-PRJ-03 // AERO-GLIDE',
-                    statusCategory: 'ACTIVE',
-                    priorityBadge: 'P2 — GLIDER & PNEUMATIC LAUNCHER',
-                    badgeStyle: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/40',
-                    title: 'Atmospheric Glider & Pneumatic Launcher',
-                    subtitle: 'Water-Propelled Pneumatic Carrier Rocket & Autonomous Gliding Data Logger',
-                    sector: 'Research & Intelligence Sectors',
-                    summary: 'Water-propelled pneumatic carrier rocket paired with an autonomous gliding data logger engineered for launch propulsion and controlled glide telemetry recording.',
-                    bom: [
-                        'Propulsion: Water-Propelled Pneumatic Carrier Rocket Stage',
-                        'Airframe: Autonomous Gliding Wing Assembly',
-                        'Avionics: Onboard Gliding Data Logger Module',
-                        'Release: Stage separation & glide transition mechanism'
-                    ],
-                    protocols: [
-                        'Pressurized water-pneumatic launch acceleration profile',
-                        'Separation into unpowered aerodynamic glide phase',
-                        'Continuous data logger capture during descent & landing'
-                    ],
-                    status: 'ACTIVE — PNEUMATIC LAUNCH & GLIDE LOGGING TRIALS'
-                },
-                {
-                    id: 'omnihouse-solar',
-                    code: 'RDIA-PRJ-04 // OMNI-SOLAR',
-                    statusCategory: 'ARCHIVED / HARDWARE',
-                    priorityBadge: 'P3 — OMNIHOUSE SOLAR GRID',
-                    badgeStyle: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/40',
-                    title: 'Omnihouse Autonomous Solar Grid',
-                    subtitle: 'Pure-Hardware, Microcontroller-Free LDR-Switched Autonomous Lighting',
-                    sector: 'Development & Defence Sectors',
-                    summary: 'Pure-hardware, microcontroller-free LDR-switched autonomous lighting system supporting Shri Krishna Heights society utility reliability with zero firmware overhead.',
-                    bom: [
-                        'Power Stage: Solar Charging Panel + Battery Storage',
-                        'Switching: Pure-Hardware LDR (Light Dependent Resistor) Circuit',
-                        'Protection: Current-Limiting Resistors & Hardware Bus',
-                        'Architecture: 100% Microcontroller-Free Analog Control'
-                    ],
-                    protocols: [
-                        'Automatic dusk activation & dawn cutoff via LDR resistance shift',
-                        'Zero microcontroller code or boot latency — instant analog response',
-                        'Current-limiting resistors protect LEDs and power stages'
-                    ],
-                    status: 'ARCHIVED / HARDWARE — COMPLETED HARDWARE BASELINE'
-                }
-            ];
-
-            function loadProjects() {
-                try {
-                    const saved = localStorage.getItem(PROJECTS_STORAGE_KEY);
-                    if (saved) {
-                        const parsed = JSON.parse(saved);
-                        if (Array.isArray(parsed) && parsed.length > 0) {
-                            return parsed;
-                        }
-                    }
-                } catch (e) {
-                    // Fallback to default projects if localStorage is unavailable
-                }
-                return DEFAULT_PROJECTS_DATA.slice();
-            }
-
-            let PROJECTS_DATA = loadProjects();
-
-            function saveProjects() {
-                try {
-                    localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(PROJECTS_DATA));
-                } catch (e) {
-                    // Ignore storage quota or privacy mode errors
-                }
-            }
-
-            // -----------------------------------------------------
-            // 1B. RESEARCH OBJECTS SECTOR DATA
-            // -----------------------------------------------------
-            const RESEARCH_OBJECTS_DATA = [
-                {
-                    id: 'obj-hcsr04',
-                    code: 'RDIA-OBJ-01',
-                    name: 'HC-SR04 Ultrasonic Sensor',
-                    category: 'SENSORS',
-                    status: 'VERIFIED',
-                    statusStyle: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/40',
-                    assignedProject: 'Victorious ROV (V-ROV)',
-                    spec: 'Trig/Echo • 2cm–400cm Ranging',
-                    notes: 'Forward obstacle ranging module used on V-ROV to detect barriers and trigger avoidance/stop behavior during ground and bench testing.'
-                },
-                {
-                    id: 'obj-river-probe',
-                    code: 'RDIA-OBJ-02',
-                    name: 'River Water-Level Probe & Buzzer Bus',
-                    category: 'SENSORS',
-                    status: 'STANDBY (N/A)',
-                    statusStyle: 'bg-amber-500/15 text-amber-400 border-amber-500/40',
-                    assignedProject: 'Victorious ROV (V-ROV)',
-                    spec: 'Analog Level Sense • Audible Alarm',
-                    notes: 'Monitors river water level when deployed in the field; river telemetry remains N/A prior to deployment and arms audible buzzer alerts at high-water thresholds.'
-                },
-                {
-                    id: 'obj-l298n',
-                    code: 'RDIA-OBJ-03',
-                    name: 'L298N Dual H-Bridge + BO Gearmotors',
-                    category: 'PROTOTYPES',
-                    status: 'ACTIVE',
-                    statusStyle: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/40',
-                    assignedProject: 'Victorious ROV (V-ROV)',
-                    spec: 'Dual Channel PWM • Tank Differential',
-                    notes: 'Drives left and right BO gearmotor pairs for tank-style differential steering, pivot turns, and forward/reverse traction on V-ROV.'
-                },
-                {
-                    id: 'obj-lcd-ir',
-                    code: 'RDIA-OBJ-04',
-                    name: 'I2C 1602 LCD & IR Control Module',
-                    category: 'MODULES',
-                    status: 'VERIFIED',
-                    statusStyle: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/40',
-                    assignedProject: 'Victorious ROV (V-ROV)',
-                    spec: 'I2C Serial Bus • Infrared Receiver',
-                    notes: 'Displays real-time rover telemetry on a compact 16x2 character LCD while receiving manual commands from the IR remote controller.'
-                },
-                {
-                    id: 'obj-ldr-array',
-                    code: 'RDIA-OBJ-05',
-                    name: 'Pure-Hardware LDR & Resistor Array',
-                    category: 'MODULES',
-                    status: 'ARCHIVED / READY',
-                    statusStyle: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/40',
-                    assignedProject: 'Omnihouse Autonomous Solar Grid',
-                    spec: 'No-MCU Analog • Current-Limited',
-                    notes: 'Microcontroller-free light-dependent resistor switching stage paired with current-limiting resistors for deterministic dusk-to-dawn society lighting.'
-                },
-                {
-                    id: 'obj-270g-payload',
-                    code: 'RDIA-OBJ-06',
-                    name: '2x100g Carrier + 70g Payload Rig',
-                    category: 'PROTOTYPES',
-                    status: 'ACTIVE',
-                    statusStyle: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/40',
-                    assignedProject: 'Cooperative Dual-Drone Payload System',
-                    spec: '270g Total Mass • Modular Bay',
-                    notes: 'Paired 100g carrier frames balanced around a 70g modular payload bay for synchronized lightweight lift and society/field experiments.'
-                },
-                {
-                    id: 'obj-glider-logger',
-                    code: 'RDIA-OBJ-07',
-                    name: 'Pneumatic Launcher & Gliding Logger',
-                    category: 'FIELD GEAR',
-                    status: 'FIELD TRIALS',
-                    statusStyle: 'bg-amber-500/15 text-amber-400 border-amber-500/40',
-                    assignedProject: 'Atmospheric Glider & Pneumatic Launcher',
-                    spec: 'Water-Pneumatic Stage • Glide Logger',
-                    notes: 'Water-propelled pneumatic launch rig and separation glider carrying an onboard telemetry logger to record descent and flight data.'
-                },
-                {
-                    id: 'obj-vision-node',
-                    code: 'RDIA-OBJ-08',
-                    name: 'Onboard Vision Testbed (Roadmap)',
-                    category: 'FIELD GEAR',
-                    status: 'ROADMAP',
-                    statusStyle: 'bg-slate-700/40 text-slate-300 border-slate-600/50',
-                    assignedProject: 'Victorious ROV (V-ROV)',
-                    spec: 'Camera & Vision Pipeline • Planned',
-                    notes: 'Planned computer vision expansion object for V-ROV to complement ultrasonic ranging with visual obstacle and landmark recognition.'
-                }
-            ];
-
-            // -----------------------------------------------------
-            // 2. AUTHORIZED OPERATIVE DIRECTORY (BACKGROUND CHECK)
-            // -----------------------------------------------------
-            const AUTHORIZED_OPERATIVES = {
-                'A-R-C-108-0980-4769': {
-                    initials: 'PR',
-                    name: 'Pratesh',
-                    clearance: 'LEVEL-5 HQ COMMAND',
-                    badgeColor: 'bg-amber-500/15 text-amber-400 border-amber-500/40',
-                    role: 'Chief of HQ & Head of Research & Tech Sector',
-                    sector: 'HQ OVERSIGHT // RESEARCH, DEVELOPMENT, INTELLIGENCE & DEFENCE',
-                    directives: [
-                        {
-                            tag: 'P1 // V-ROV',
-                            tagStyle: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
-                            time: 'FIELD PRIORITY',
-                            title: 'Victorious ROV (V-ROV) Tank Drive & Sensor Verification',
-                            body: 'Validate L298N + BO gearmotor differential steering, HC-SR04 obstacle detection, IR remote control, I2C 1602 LCD output, and audible buzzer alarm readiness.'
-                        },
-                        {
-                            tag: 'P2 // AERO & UAV',
-                            tagStyle: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30',
-                            time: 'ACTIVE TRACK',
-                            title: '270g Dual-Drone Payload & Pneumatic Glider Logger',
-                            body: 'Review 2x 100g + 70g payload configuration and pneumatic glider data logger telemetry.'
-                        }
-                    ],
-                    checklist: [
-                        { item: 'V-ROV L298N + BO Gearmotor Tank Drive', status: 'READY', ok: true },
-                        { item: 'HC-SR04 + IR + I2C 1602 LCD + Buzzer', status: 'ACTIVE', ok: true },
-                        { item: 'Omnihouse Pure-Hardware LDR Solar Grid', status: 'ARCHIVED', ok: true }
-                    ]
-                },
-                'R-R-C-204-1190-3321': {
-                    initials: 'R1',
-                    name: 'Operative R-01',
-                    clearance: 'LEVEL-4 SECTOR LEAD',
-                    badgeColor: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/40',
-                    role: 'Research Sector Lead — Autonomy, Vision & Aerodynamics',
-                    sector: 'SECTOR // RESEARCH',
-                    directives: [
-                        {
-                            tag: 'RESEARCH // P1-P2',
-                            tagStyle: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30',
-                            time: 'ACTIVE RESEARCH',
-                            title: 'V-ROV Computer Vision Roadmap & 270g Lift Study',
-                            body: 'Scope onboard computer vision milestones for V-ROV and aerodynamic stability across dual-drone and glider trials.'
-                        }
-                    ],
-                    checklist: [
-                        { item: 'V-ROV Computer Vision Roadmap', status: 'SCOPING', ok: false },
-                        { item: '2x100g + 70g Payload Mass Budget', status: 'VERIFIED', ok: true },
-                        { item: 'Gliding Data Logger Telemetry Spec', status: 'ACTIVE', ok: true }
-                    ]
-                },
-                'D-R-C-315-8842-6019': {
-                    initials: 'D1',
-                    name: 'Operative D-01',
-                    clearance: 'LEVEL-4 SECTOR LEAD',
-                    badgeColor: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/40',
-                    role: 'Development Sector Lead — Drivetrains, Sensors & Hardware',
-                    sector: 'SECTOR // DEVELOPMENT',
-                    directives: [
-                        {
-                            tag: 'DEV // P1 & P3',
-                            tagStyle: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
-                            time: 'HARDWARE BENCH',
-                            title: 'L298N Gearmotor Bus, Buzzer & LDR Circuit Check',
-                            body: 'Ensure clean L298N motor wiring, reliable buzzer alert trigger, and microcontroller-free LDR solar lighting operation.'
-                        }
-                    ],
-                    checklist: [
-                        { item: 'L298N + BO Gearmotor Wiring', status: 'VERIFIED', ok: true },
-                        { item: 'I2C 1602 LCD & IR Receiver', status: 'VERIFIED', ok: true },
-                        { item: 'Omnihouse LDR Hardware Grid', status: 'ARCHIVED', ok: true }
-                    ]
-                },
-                'I-R-C-409-7721-9044': {
-                    initials: 'I1',
-                    name: 'Operative I-01',
-                    clearance: 'LEVEL-3 SECTOR LEAD',
-                    badgeColor: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/40',
-                    role: 'Intelligence Sector Lead — Telemetry & Field Data',
-                    sector: 'SECTOR // INTELLIGENCE',
-                    directives: [
-                        {
-                            tag: 'INTEL // TELEMETRY',
-                            tagStyle: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30',
-                            time: 'MONITORING',
-                            title: 'River Water-Level N/A Hold & Glider Log Capture',
-                            body: 'Maintain N/A status on river water-level feed until field deployment and verify gliding data logger packet integrity.'
-                        }
-                    ],
-                    checklist: [
-                        { item: 'River Feed Pre-Deployment (N/A)', status: 'HOLDING', ok: true },
-                        { item: 'HC-SR04 Distance Telemetry', status: 'ONLINE', ok: true },
-                        { item: 'Glider Data Logger Capture', status: 'ACTIVE', ok: true }
-                    ]
-                },
-                'F-R-C-512-6630-1182': {
-                    initials: 'F1',
-                    name: 'Operative F-01',
-                    clearance: 'LEVEL-3 SECTOR LEAD',
-                    badgeColor: 'bg-amber-500/15 text-amber-400 border-amber-500/40',
-                    role: 'Defence Sector Lead — Field Safety, Alerts & Resilience',
-                    sector: 'SECTOR // DEFENCE',
-                    directives: [
-                        {
-                            tag: 'DEFENCE // FIELD',
-                            tagStyle: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
-                            time: 'FIELD SAFETY',
-                            title: 'V-ROV Audible Buzzer & Launcher Perimeter Check',
-                            body: 'Verify audible buzzer alarms on V-ROV and enforce clear safety zones during pneumatic launcher and drone tests.'
-                        }
-                    ],
-                    checklist: [
-                        { item: 'V-ROV Audible Buzzer Alert', status: 'ARMED', ok: true },
-                        { item: 'Pneumatic Launcher Safety Check', status: 'ACTIVE', ok: true },
-                        { item: 'Autonomous Solar Perimeter Lights', status: 'READY', ok: true }
-                    ]
-                }
-            };
-
-            // -----------------------------------------------------
-            // 3. MOBILE MENU TOGGLE
-            // -----------------------------------------------------
-            const mobileToggle = document.getElementById('mobile-menu-toggle');
-            const mobileMenu = document.getElementById('mobile-menu');
-            if (mobileToggle && mobileMenu) {
-                mobileToggle.addEventListener('click', () => {
-                    mobileMenu.classList.toggle('hidden');
-                });
-                mobileMenu.querySelectorAll('a').forEach((link) => {
-                    link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
-                });
-            }
-
-            // -----------------------------------------------------
-            // 4. PROJECTS FILTERING & RENDERING
-            // -----------------------------------------------------
-            const projectsGrid = document.getElementById('projects-grid');
-            const filterBtns = document.querySelectorAll('.filter-btn');
-            let activeProjectFilter = 'ALL';
-
-            function renderProjects(filter = activeProjectFilter) {
-                activeProjectFilter = filter;
-                if (!projectsGrid) return;
-                const filtered = filter === 'ALL'
-                    ? PROJECTS_DATA
-                    : PROJECTS_DATA.filter((p) => p.statusCategory === filter);
-
-                if (filtered.length === 0) {
-                    projectsGrid.innerHTML = `
-                        <div class="md:col-span-2 p-8 rounded-2xl bg-navy-900/70 border border-slate-800 text-center font-mono text-xs text-slate-400">
-                            No projects match filter "${filter}".
-                        </div>
-                    `;
-                    return;
-                }
-
-                projectsGrid.innerHTML = filtered.map((project) => `
-                    <article class="flex flex-col justify-between p-6 sm:p-7 rounded-2xl bg-navy-900/90 border border-slate-800 hover:border-cyan-500/50 transition-all group">
-                        <div>
-                            <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-                                <span class="font-mono text-xs text-slate-400">${project.code}</span>
-                                <span class="font-mono text-[11px] font-bold px-2.5 py-1 rounded border ${project.badgeStyle}">
-                                    ${project.priorityBadge}
-                                </span>
-                            </div>
-                            <h3 class="text-xl sm:text-2xl font-bold text-white mb-1 group-hover:text-cyan-300 transition-colors">
-                                ${project.title}
-                            </h3>
-                            <p class="font-mono text-xs text-cyan-400/90 mb-4">${project.subtitle}</p>
-                            <p class="text-sm text-slate-400 leading-relaxed mb-6">${project.summary}</p>
-                        </div>
-
-                        <div class="pt-4 border-t border-slate-800/90 flex items-center justify-between gap-3">
-                            <span class="font-mono text-[11px] text-slate-500 truncate">${project.sector}</span>
-                            <button type="button" data-project-id="${project.id}" class="open-dossier-btn shrink-0 inline-flex items-center space-x-1.5 font-mono text-xs font-bold text-cyan-400 hover:text-navy-950 hover:bg-cyan-400 py-2 px-3.5 rounded-lg bg-cyan-500/10 border border-cyan-500/30 transition-all">
-                                <span>Tech Specs / Dossier</span>
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                </svg>
-                            </button>
-                        </div>
-                    </article>
-                `).join('');
-
-                document.querySelectorAll('.open-dossier-btn').forEach((btn) => {
-                    btn.addEventListener('click', () => openProjectModal(btn.dataset.projectId));
-                });
-            }
-
-            filterBtns.forEach((btn) => {
-                btn.addEventListener('click', () => {
-                    filterBtns.forEach((b) => {
-                        b.classList.remove('bg-cyan-500', 'text-navy-950', 'font-bold');
-                        b.classList.add('bg-navy-900', 'text-slate-300', 'border', 'border-slate-800', 'font-semibold');
-                    });
-                    btn.classList.remove('bg-navy-900', 'text-slate-300', 'border', 'border-slate-800', 'font-semibold');
-                    btn.classList.add('bg-cyan-500', 'text-navy-950', 'font-bold');
-                    renderProjects(btn.dataset.filter);
-                });
-            });
-
-            renderProjects('ALL');
-
-            // -----------------------------------------------------
-            // 4B. STAFF PORTAL — ADD PROJECT MODAL & PERSISTENCE
-            // -----------------------------------------------------
-            const openAddProjectBtn = document.getElementById('open-add-project-btn');
-            const addProjectModal = document.getElementById('add-project-modal');
-            const closeAddProjectBtn = document.getElementById('close-add-project-btn');
-            const cancelAddProjectBtn = document.getElementById('cancel-add-project-btn');
-            const addProjectForm = document.getElementById('add-project-form');
-            const addProjectFeedback = document.getElementById('add-project-feedback');
-
-            function openAddProjectModal() {
-                if (addProjectFeedback) addProjectFeedback.classList.add('hidden');
-                if (addProjectModal) addProjectModal.classList.remove('hidden');
-                const titleInput = document.getElementById('new-proj-title');
-                if (titleInput) titleInput.focus();
-            }
-
-            function closeAddProjectModal() {
-                if (addProjectModal) addProjectModal.classList.add('hidden');
-                if (addProjectForm) addProjectForm.reset();
-                if (addProjectFeedback) addProjectFeedback.classList.add('hidden');
-            }
-
-            if (openAddProjectBtn) openAddProjectBtn.addEventListener('click', openAddProjectModal);
-            if (closeAddProjectBtn) closeAddProjectBtn.addEventListener('click', closeAddProjectModal);
-            if (cancelAddProjectBtn) cancelAddProjectBtn.addEventListener('click', closeAddProjectModal);
-            if (addProjectModal) {
-                addProjectModal.addEventListener('click', (e) => {
-                    if (e.target === addProjectModal) closeAddProjectModal();
-                });
-            }
-
-            if (addProjectForm) {
-                addProjectForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    const title = document.getElementById('new-proj-title').value.trim();
-                    const priorityRaw = document.getElementById('new-proj-priority').value.trim().toUpperCase();
-                    const statusCategory = document.getElementById('new-proj-status').value;
-                    const sector = document.getElementById('new-proj-sector').value;
-                    const subtitle = document.getElementById('new-proj-subtitle').value.trim() || 'Shri Krishna Heights Society Innovation Project';
-                    const summary = document.getElementById('new-proj-summary').value.trim();
-                    const hardwareLines = document.getElementById('new-proj-hardware').value
-                        .split('\n')
-                        .map((l) => l.trim())
-                        .filter(Boolean);
-                    const noteLines = document.getElementById('new-proj-notes').value
-                        .split('\n')
-                        .map((l) => l.trim())
-                        .filter(Boolean);
-
-                    if (!title || !priorityRaw || !summary) {
-                        if (addProjectFeedback) {
-                            addProjectFeedback.textContent = 'Please fill in Project Title, Priority / Tag, and Summary.';
-                            addProjectFeedback.classList.remove('hidden');
-                        }
-                        return;
-                    }
-
-                    const badgeStyle = statusCategory === 'FIELD TESTING'
-                        ? 'bg-amber-500/15 text-amber-400 border-amber-500/40'
-                        : statusCategory === 'ARCHIVED / HARDWARE'
-                            ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/40'
-                            : 'bg-cyan-500/15 text-cyan-400 border-cyan-500/40';
-
-                    const nextNum = String(PROJECTS_DATA.length + 1).padStart(2, '0');
-                    const slugId = `custom-proj-${Date.now()}`;
-
-                    const createdProject = {
-                        id: slugId,
-                        code: `RDIA-PRJ-${nextNum} // SKH`,
-                        statusCategory,
-                        priorityBadge: priorityRaw,
-                        badgeStyle,
-                        title,
-                        subtitle,
-                        sector,
-                        summary,
-                        bom: hardwareLines.length > 0 ? hardwareLines : ['Bench Hardware & Prototype Assembly'],
-                        protocols: noteLines.length > 0 ? noteLines : ['Shri Krishna Heights Welfare & Safety Evaluation'],
-                        status: `${statusCategory} — ADDED VIA STAFF PORTAL`
-                    };
-
-                    PROJECTS_DATA = [createdProject, ...PROJECTS_DATA];
-                    saveProjects();
-                    renderProjects(activeProjectFilter);
-                    closeAddProjectModal();
-                });
-            }
-
-            // -----------------------------------------------------
-            // 4C. RESEARCH OBJECTS SECTOR RENDERING & INSPECTOR
-            // -----------------------------------------------------
-            const researchObjectsGrid = document.getElementById('research-objects-grid');
-            const objFilterBtns = document.querySelectorAll('.obj-filter-btn');
-            let activeObjFilter = 'ALL';
-            let selectedObjectId = RESEARCH_OBJECTS_DATA[0].id;
-
-            function updateObjectInspector(objId) {
-                const obj = RESEARCH_OBJECTS_DATA.find((item) => item.id === objId) || RESEARCH_OBJECTS_DATA[0];
-                if (!obj) return;
-                selectedObjectId = obj.id;
-
-                document.getElementById('insp-obj-code').textContent = obj.code;
-                document.getElementById('insp-obj-category').textContent = `SECTOR // ${obj.category}`;
-                document.getElementById('insp-obj-name').textContent = obj.name;
-                document.getElementById('insp-obj-notes').textContent = obj.notes;
-                document.getElementById('insp-obj-project').textContent = obj.assignedProject;
-                document.getElementById('insp-obj-spec').textContent = obj.spec;
-
-                const statusEl = document.getElementById('insp-obj-status');
-                statusEl.textContent = obj.status;
-                statusEl.className = `font-mono text-[10px] font-bold px-2 py-0.5 rounded border ${obj.statusStyle}`;
-            }
-
-            function renderResearchObjects(filter = activeObjFilter) {
-                activeObjFilter = filter;
-                if (!researchObjectsGrid) return;
-
-                const items = filter === 'ALL'
-                    ? RESEARCH_OBJECTS_DATA
-                    : RESEARCH_OBJECTS_DATA.filter((item) => item.category === filter);
-
-                researchObjectsGrid.innerHTML = items.map((obj) => {
-                    const isSelected = obj.id === selectedObjectId;
-                    return `
-                        <button type="button" data-obj-id="${obj.id}" class="research-obj-card text-left p-4 rounded-xl bg-navy-950 border ${isSelected ? 'border-cyan-400 ring-1 ring-cyan-400/30' : 'border-slate-800 hover:border-cyan-500/40'} transition-all flex flex-col justify-between space-y-3">
-                            <div>
-                                <div class="flex items-center justify-between gap-2 mb-1.5">
-                                    <span class="font-mono text-[10px] text-slate-500">${obj.code} • ${obj.category}</span>
-                                    <span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded border ${obj.statusStyle}">${obj.status}</span>
-                                </div>
-                                <div class="text-sm font-bold text-white">${obj.name}</div>
-                                <p class="text-xs text-slate-400 mt-1 line-clamp-2">${obj.notes}</p>
-                            </div>
-                            <div class="font-mono text-[10px] text-cyan-400/90 pt-2 border-t border-slate-800/80 truncate">
-                                PROJECT: ${obj.assignedProject}
-                            </div>
-                        </button>
-                    `;
-                }).join('');
-
-                document.querySelectorAll('.research-obj-card').forEach((card) => {
-                    card.addEventListener('click', () => {
-                        updateObjectInspector(card.dataset.objId);
-                        renderResearchObjects(activeObjFilter);
-                    });
-                });
-            }
-
-            objFilterBtns.forEach((btn) => {
-                btn.addEventListener('click', () => {
-                    objFilterBtns.forEach((b) => {
-                        b.classList.remove('bg-cyan-500', 'text-navy-950', 'font-bold');
-                        b.classList.add('bg-navy-950', 'text-slate-300', 'border', 'border-slate-800', 'font-semibold');
-                    });
-                    btn.classList.remove('bg-navy-950', 'text-slate-300', 'border', 'border-slate-800', 'font-semibold');
-                    btn.classList.add('bg-cyan-500', 'text-navy-950', 'font-bold');
-                    renderResearchObjects(btn.dataset.objFilter);
-                });
-            });
-
-            updateObjectInspector(selectedObjectId);
-            renderResearchObjects('ALL');
-
-            // -----------------------------------------------------
-            // 5. PROJECT DOSSIER MODAL
-            // -----------------------------------------------------
-            const modal = document.getElementById('project-modal');
-            const closeModalBtn = document.getElementById('close-modal-btn');
-            const modalDoneBtn = document.getElementById('modal-done-btn');
-
-            function openProjectModal(projectId) {
-                const project = PROJECTS_DATA.find((p) => p.id === projectId);
-                if (!project || !modal) return;
-
-                const priorityEl = document.getElementById('modal-priority');
-                priorityEl.textContent = project.priorityBadge;
-                priorityEl.className = `font-mono text-xs font-bold px-2.5 py-1 rounded border ${project.badgeStyle}`;
-
-                document.getElementById('modal-code').textContent = project.code;
-                document.getElementById('modal-title').textContent = project.title;
-                document.getElementById('modal-sector').textContent = `${project.subtitle} // ${project.sector}`;
-                document.getElementById('modal-summary').textContent = project.summary;
-                document.getElementById('modal-status').textContent = project.status;
-
-                document.getElementById('modal-bom').innerHTML = project.bom
-                    .map((item) => `<li class="flex items-start space-x-2"><span class="text-emerald-400">▸</span><span>${item}</span></li>`)
-                    .join('');
-
-                document.getElementById('modal-protocols').innerHTML = project.protocols
-                    .map((proto) => `<li class="flex items-start space-x-2"><span class="text-cyan-400">▸</span><span>${proto}</span></li>`)
-                    .join('');
-
-                modal.classList.remove('hidden');
-            }
-
-            function closeProjectModal() {
-                if (modal) modal.classList.add('hidden');
-            }
-
-            if (closeModalBtn) closeModalBtn.addEventListener('click', closeProjectModal);
-            if (modalDoneBtn) modalDoneBtn.addEventListener('click', closeProjectModal);
-            if (modal) {
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) closeProjectModal();
-                });
-            }
-
-            // -----------------------------------------------------
-            // 6. STAFF PORTAL AUTHENTICATION (X-R-C-###-####-####)
-            // -----------------------------------------------------
-            const staffIdInput = document.getElementById('staff-id-input');
-            const charCounter = document.getElementById('char-counter');
-            const clearIdBtn = document.getElementById('clear-id-btn');
-            const loginForm = document.getElementById('staff-login-form');
-            const authFeedback = document.getElementById('auth-feedback');
-            const loginView = document.getElementById('portal-login-view');
-            const dashboardView = document.getElementById('portal-dashboard-view');
-            const signOutBtn = document.getElementById('sign-out-btn');
-            const navPortalText = document.getElementById('nav-portal-text');
-            const navStatusDot = document.getElementById('nav-status-dot');
-
-            let sessionTimer = null;
-            let elapsedSeconds = 0;
-
-            function formatOperativeId(rawValue) {
-                const cleaned = String(rawValue || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 14);
-                const segments = [];
-                if (cleaned.length > 0) segments.push(cleaned.slice(0, 1));
-                if (cleaned.length > 1) segments.push(cleaned.slice(1, 2));
-                if (cleaned.length > 2) segments.push(cleaned.slice(2, 3));
-                if (cleaned.length > 3) segments.push(cleaned.slice(3, 6));
-                if (cleaned.length > 6) segments.push(cleaned.slice(6, 10));
-                if (cleaned.length > 10) segments.push(cleaned.slice(10, 14));
-                return segments.join('-');
-            }
-
-            function syncIdInputMeta(val) {
-                if (charCounter) charCounter.textContent = `${val.length} / 19`;
-                if (clearIdBtn) clearIdBtn.classList.toggle('hidden', val.length === 0);
-            }
-
-            function showAuthFeedback(isSuccess, message) {
-                if (!authFeedback) return;
-                authFeedback.classList.remove('hidden');
-                if (isSuccess) {
-                    authFeedback.className = 'rounded-xl p-3.5 font-mono text-xs bg-emerald-500/10 border border-emerald-500/40 text-emerald-300';
-                } else {
-                    authFeedback.className = 'rounded-xl p-3.5 font-mono text-xs bg-rose-500/10 border border-rose-500/40 text-rose-300';
-                }
-                authFeedback.textContent = message;
-            }
-
-            function startSessionClock() {
-                clearInterval(sessionTimer);
-                elapsedSeconds = 0;
-                const timerEl = document.getElementById('dash-session-timer');
-                if (timerEl) timerEl.textContent = 'UPTIME: 00:00';
-
-                sessionTimer = setInterval(() => {
-                    elapsedSeconds += 1;
-                    const mins = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
-                    const secs = String(elapsedSeconds % 60).padStart(2, '0');
-                    if (timerEl) timerEl.textContent = `UPTIME: ${mins}:${secs}`;
-                }, 1000);
-            }
-
-            function openCommandDashboard(operativeId, profile) {
-                document.getElementById('dash-session-id').textContent = `ID: ${operativeId}`;
-                document.getElementById('dash-avatar').textContent = profile.initials;
-                document.getElementById('dash-name').textContent = profile.name;
-                document.getElementById('dash-role').textContent = profile.role;
-                document.getElementById('dash-sector').textContent = profile.sector;
-
-                const clearanceEl = document.getElementById('dash-clearance');
-                clearanceEl.textContent = profile.clearance;
-                clearanceEl.className = `font-mono text-xs font-bold px-2.5 py-0.5 rounded border ${profile.badgeColor}`;
-
-                document.getElementById('dash-directives').innerHTML = profile.directives.map((d) => `
-                    <div class="p-4 rounded-xl bg-navy-950 border border-slate-800 space-y-1.5">
-                        <div class="flex items-center justify-between gap-2">
-                            <span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded border ${d.tagStyle}">${d.tag}</span>
-                            <span class="font-mono text-[10px] text-slate-500">${d.time}</span>
-                        </div>
-                        <div class="text-sm font-bold text-white">${d.title}</div>
-                        <p class="text-xs text-slate-400 leading-relaxed">${d.body}</p>
-                    </div>
-                `).join('');
-
-                document.getElementById('dash-checklist').innerHTML = profile.checklist.map((entry) => `
-                    <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-navy-900 border border-slate-800/80">
-                        <span class="text-slate-300 truncate pr-2">${entry.item}</span>
-                        <span class="${entry.ok ? 'text-emerald-400' : 'text-amber-400'} font-bold shrink-0">${entry.status}</span>
-                    </div>
-                `).join('');
-
-                if (navPortalText) navPortalText.textContent = `CMD // ${profile.name.toUpperCase()}`;
-                if (navStatusDot) {
-                    navStatusDot.classList.remove('bg-emerald-400');
-                    navStatusDot.classList.add('bg-cyan-400');
-                }
-
-                if (loginView) loginView.classList.add('hidden');
-                if (dashboardView) dashboardView.classList.remove('hidden');
-
-                renderResearchObjects(activeObjFilter);
-                updateVrovMonitor();
-                startSessionClock();
-            }
-
-            if (staffIdInput) {
-                staffIdInput.addEventListener('input', (e) => {
-                    const formatted = formatOperativeId(e.target.value);
-                    e.target.value = formatted;
-                    syncIdInputMeta(formatted);
-                    if (authFeedback) authFeedback.classList.add('hidden');
-                });
-            }
-
-            if (clearIdBtn && staffIdInput) {
-                clearIdBtn.addEventListener('click', () => {
-                    staffIdInput.value = '';
-                    syncIdInputMeta('');
-                    if (authFeedback) authFeedback.classList.add('hidden');
-                    staffIdInput.focus();
-                });
-            }
-
-            if (loginForm && staffIdInput) {
-                loginForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    const formattedId = formatOperativeId(staffIdInput.value);
-                    staffIdInput.value = formattedId;
-                    syncIdInputMeta(formattedId);
-
-                    if (!formattedId) {
-                        showAuthFeedback(false, 'ACCESS DENIED: Please enter an RDIA Operative ID.');
-                        staffIdInput.focus();
-                        return;
-                    }
-
-                    if (formattedId.length < 19) {
-                        showAuthFeedback(false, 'INVALID FORMAT: Expected X-R-C-###-####-####.');
-                        staffIdInput.focus();
-                        return;
-                    }
-
-                    const matchedProfile = AUTHORIZED_OPERATIVES[formattedId];
-                    if (matchedProfile) {
-                        showAuthFeedback(true, `ACCESS GRANTED: Welcome, ${matchedProfile.name}. Opening Command Dashboard...`);
-                        setTimeout(() => {
-                            openCommandDashboard(formattedId, matchedProfile);
-                        }, 250);
-                    } else {
-                        showAuthFeedback(false, `ACCESS DENIED: Operative ID "${formattedId}" is not authorized.`);
-                    }
-                });
-            }
-
-            if (signOutBtn) {
-                signOutBtn.addEventListener('click', () => {
-                    clearInterval(sessionTimer);
-                    if (dashboardView) dashboardView.classList.add('hidden');
-                    if (loginView) loginView.classList.remove('hidden');
-                    if (staffIdInput) {
-                        staffIdInput.value = '';
-                        syncIdInputMeta('');
-                    }
-                    if (authFeedback) authFeedback.classList.add('hidden');
-                    if (navPortalText) navPortalText.textContent = 'SYS ONLINE // STANDBY';
-                    if (navStatusDot) {
-                        navStatusDot.classList.remove('bg-cyan-400');
-                        navStatusDot.classList.add('bg-emerald-400');
-                    }
-                });
-            }
-
-            // -----------------------------------------------------
-            // 7. V-ROV TELEMETRY MONITOR (RIVER FEED = N/A)
-            // -----------------------------------------------------
-            const lcdLine1 = document.getElementById('lcd-line-1');
-            const lcdAlarmTag = document.getElementById('lcd-alarm-tag');
-            const waterReadout = document.getElementById('water-level-readout');
-            const riverFeedStatus = document.getElementById('river-feed-status');
-            const sonarReadout = document.getElementById('telemetry-sonar');
-            const pingSonarBtn = document.getElementById('ping-sonar-btn');
-            const sonarSlider = document.getElementById('sonar-distance-slider');
-            const sonarStatus = document.getElementById('sonar-clearance-status');
-            const sonarCloseBtn = document.getElementById('sonar-close-btn');
-            const sonarClearBtn = document.getElementById('sonar-clear-btn');
-
-            let sonarDistanceCm = 120;
-
-            function updateVrovMonitor() {
-                // River water level stays N/A until field deployment
-                if (waterReadout) waterReadout.textContent = 'N/A';
-                if (riverFeedStatus) riverFeedStatus.textContent = 'WATER LEVEL: N/A — FIELD DEPLOYMENT PENDING';
-                if (lcdLine1) lcdLine1.textContent = `RIVER: N/A  DST: ${sonarDistanceCm}cm`;
-                if (sonarReadout) sonarReadout.textContent = `${sonarDistanceCm} cm`;
-                if (sonarSlider) sonarSlider.value = String(sonarDistanceCm);
-
-                const isClose = sonarDistanceCm <= 35;
-                if (lcdAlarmTag) {
-                    lcdAlarmTag.textContent = isClose ? '[OBS!]' : '[STBY]';
-                    lcdAlarmTag.className = isClose ? 'font-bold text-amber-300' : 'font-bold text-slate-400';
-                }
-                if (sonarStatus) {
-                    sonarStatus.textContent = isClose
-                        ? `OBSTACLE CLOSE (${sonarDistanceCm}cm)`
-                        : 'PATH CLEAR (>35cm)';
-                    sonarStatus.className = isClose
-                        ? 'text-amber-400 font-semibold'
-                        : 'text-emerald-400 font-semibold';
-                }
-            }
-
-            if (pingSonarBtn) {
-                pingSonarBtn.addEventListener('click', () => {
-                    sonarDistanceCm = Math.floor(Math.random() * (190 - 18 + 1)) + 18;
-                    updateVrovMonitor();
-                });
-            }
-
-            if (sonarSlider) {
-                sonarSlider.addEventListener('input', (e) => {
-                    sonarDistanceCm = Number(e.target.value);
-                    updateVrovMonitor();
-                });
-            }
-
-            if (sonarCloseBtn) {
-                sonarCloseBtn.addEventListener('click', () => {
-                    sonarDistanceCm = 22;
-                    updateVrovMonitor();
-                });
-            }
-
-            if (sonarClearBtn) {
-                sonarClearBtn.addEventListener('click', () => {
-                    sonarDistanceCm = 140;
-                    updateVrovMonitor();
-                });
-            }
-
-            updateVrovMonitor();
+  </footer>
+
+  <!-- PROJECT TECH SPECS / ACS DOSSIER MODAL -->
+  <div id="project-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="glass-card max-w-2xl w-full rounded-2xl p-6 sm:p-8 border border-cyan-500/40 relative max-h-[90vh] overflow-y-auto">
+      <button id="close-modal-btn" class="absolute top-5 right-5 text-slate-400 hover:text-white p-1.5 rounded-lg bg-slate-800/80">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <div id="modal-content">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD RESEARCH PROJECT MODAL (SCP ACS STYLE) -->
+  <div id="acs-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/85 backdrop-blur-sm">
+    <div class="glass-card max-w-3xl w-full rounded-2xl p-6 sm:p-8 border border-cyan-500/50 relative max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slateborder pb-4 mb-5">
+        <div>
+          <span class="font-mono text-[10px] text-cyan-400 uppercase tracking-widest">RESEARCH BRANCH [R] • ANOMALY CLASSIFICATION SYSTEM</span>
+          <h3 class="text-xl font-bold text-white mt-0.5">Register New Research Project (SCP-ACS Template)</h3>
+        </div>
+        <button onclick="closeAcsModal()" class="text-slate-400 hover:text-white p-1.5 rounded-lg bg-slate-800/80">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Live SCP ACS Header Banner Preview -->
+      <div class="acs-container rounded-xl p-4 mb-6 font-mono">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3 mb-3">
+          <div>
+            <span class="text-[10px] text-slate-500 block">ITEM DESIGNATION</span>
+            <span id="acs-prev-code" class="text-lg font-extrabold text-white tracking-wider">R-G-005</span>
+          </div>
+          <div class="text-right">
+            <span class="text-[10px] text-slate-500 block">CLEARANCE &amp; PLATFORM</span>
+            <span id="acs-prev-meta" class="text-xs font-bold text-cyan-400">LEVEL 3 // GROUND [G]</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+          <div id="acs-box-itemclass" class="p-2.5 rounded acs-stripe-safe font-bold">
+            <span class="block text-[9px] opacity-80">ITEM CLASS</span>
+            <span id="acs-prev-itemclass">SAFE</span>
+          </div>
+          <div class="p-2.5 rounded bg-slate-900 border border-slate-700 text-slate-200">
+            <span class="block text-[9px] text-slate-400">DISRUPTION CLASS (COUPLED)</span>
+            <span id="acs-prev-disrupt" class="font-bold text-emerald-400">1 // DARK</span>
+          </div>
+          <div class="p-2.5 rounded bg-slate-900 border border-slate-700 text-slate-200">
+            <span class="block text-[9px] text-slate-400">RISK CLASS (COUPLED)</span>
+            <span id="acs-prev-risk" class="font-bold text-cyan-400">1 // NOTICE</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACS Form Inputs with Placeholders -->
+      <form id="acs-project-form" class="space-y-4">
+        <!-- 3-Segment Designation Builder -->
+        <div>
+          <label class="block font-mono text-[11px] text-slate-400 uppercase mb-1.5">Item Designation ([Branch]-[Type]-[Serial No.])</label>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <select id="acs-branch" class="w-full font-mono text-xs px-3 py-2.5 rounded-lg bg-obsidian border border-slateborder focus:border-cyan-400 text-white outline-none">
+                <option value="R">R — Research</option>
+                <option value="D">D — Development</option>
+                <option value="I">I — Intelligence</option>
+                <option value="L">L — Logistics</option>
+                <option value="C">C — Cultural Committee</option>
+                <option value="W">W — Welfare</option>
+              </select>
+            </div>
+            <div>
+              <select id="acs-platform" class="w-full font-mono text-xs px-3 py-2.5 rounded-lg bg-obsidian border border-slateborder focus:border-cyan-400 text-white outline-none">
+                <option value="G">G — Ground (UGV / Rover)</option>
+                <option value="A">A — Aerial (UAV / Glider)</option>
+                <option value="U">U — Water / Marine (ROV)</option>
+                <option value="XU">XU — Experimental</option>
+                <option value="S">S — Static / Infrastructure</option>
+                <option value="E">E — Electronics / Embedded</option>
+                <option value="SW">SW — Software / AI</option>
+              </select>
+            </div>
+            <div>
+              <input
+                type="text"
+                id="acs-serial"
+                maxlength="3"
+                placeholder="ex. 012"
+                required
+                class="w-full font-mono text-xs px-3.5 py-2.5 rounded-lg bg-obsidian border border-slateborder focus:border-cyan-400 text-white placeholder-slate-500 outline-none"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-mono text-[11px] text-slate-400 uppercase mb-1">Project / Discovery Name</label>
+            <input
+              type="text"
+              id="acs-name"
+              placeholder="e.g., Autonomous River Buoy Array"
+              required
+              class="w-full text-xs px-3.5 py-2.5 rounded-lg bg-obsidian border border-slateborder focus:border-cyan-400 text-white placeholder-slate-500 outline-none"
+            />
+          </div>
+          <div>
+            <label class="block font-mono text-[11px] text-slate-400 uppercase mb-1">Research Sub-Type / Domain</label>
+            <input
+              type="text"
+              id="acs-type"
+              placeholder="e.g., Autonomous UGV / Telemetry / Society Grid"
+              required
+              class="w-full text-xs px-3.5 py-2.5 rounded-lg bg-obsidian border border-slateborder focus:border-cyan-400 text-white placeholder-slate-500 outline-none"
+            />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-mono text-[11px] text-slate-400 uppercase mb-1">Item Class (Defines Disruption &amp; Risk)</label>
+            <select id="acs-item-class" class="w-full font-mono text-xs px-3 py-2.5 rounded-lg bg-obsidian border border-slateborder focus:border-cyan-400 text-white outline-none">
+              <option value="SAFE">SAFE (Dark / Notice)</option>
+              <option value="EUCLID">EUCLID (Vlam / Caution)</option>
+              <option value="KETER">KETER (Ekhi / Danger)</option>
+              <option value="THAUMIEL">THAUMIEL (Keneq / Caution)</option>
+              <option value="APOLLYON">APOLLYON (Amida / Critical)</option>
+              <option value="DECOMMISSIONED">DECOMMISSIONED (None / Neutralized)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-mono text-[11px] text-slate-400 uppercase mb-1">Clearance Level</label>
+            <select id="acs-clearance" class="w-full font-mono text-xs px-3 py-2.5 rounded-lg bg-obsidian border border-slateborder focus:border-cyan-400 text-white outline-none">
+              <option value="LEVEL 2 // RESTRICTED">LEVEL 2 // RESTRICTED</option>
+              <option value="LEVEL 3 // RESEARCH" selected>LEVEL 3 // RESEARCH</option>
+              <option value="LEVEL 4 // COMMAND">LEVEL 4 // COMMAND</option>
+              <option value="LEVEL 5 // ADMIN ONLY">LEVEL 5 // ADMIN ONLY</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-mono text-[11px] text-slate-400 uppercase mb-1">Special Operational &amp; Containment Procedures</label>
+          <textarea
+            id="acs-procedures"
+            rows="2"
+            placeholder="Enter handling rules, battery/voltage safety protocols, and Shri Krishna Heights testing boundaries..."
+            required
+            class="w-full text-xs px-3.5 py-2.5 rounded-lg bg-obsidian border border-slateborder focus:border-cyan-400 text-white placeholder-slate-500 outline-none"
+          ></textarea>
+        </div>
+
+        <div>
+          <label class="block font-mono text-[11px] text-slate-400 uppercase mb-1">Description &amp; Societal Benefit</label>
+          <textarea
+            id="acs-description"
+            rows="3"
+            placeholder="Describe technical architecture, components used, discovery findings, and how this innovation contributes to society..."
+            required
+            class="w-full text-xs px-3.5 py-2.5 rounded-lg bg-obsidian border border-slateborder focus:border-cyan-400 text-white placeholder-slate-500 outline-none"
+          ></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <button type="button" onclick="closeAcsModal()" class="px-4 py-2.5 rounded-lg bg-slatepanel border border-slateborder text-slate-300 font-mono text-xs hover:text-white transition">
+            CANCEL
+          </button>
+          <button type="submit" class="px-5 py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 font-mono font-bold text-xs uppercase tracking-wider transition">
+            PUBLISH TO RDIA ARCHIVE &rarr;
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- APPLICATION LOGIC -->
+  <script>
+    // ==========================================
+    // 1. LOOKUP TABLES: RANKS, BRANCHES, PLATFORM TYPES & COUPLED ACS ITEM CLASSES
+    // ==========================================
+    const RANK_MAP = {
+      'A': 'Administrator (5 Max)',
+      'MX': 'Moderator',
+      'C': 'Co-ordinator',
+      'M': 'Manager',
+      'm': 'Member'
+    };
+
+    const BRANCH_MAP = {
+      'R': 'Research',
+      'D': 'Development',
+      'I': 'Intelligence (incl. Defence)',
+      'L': 'Logistics',
+      'C': 'Cultural Committee',
+      'W': 'Welfare'
+    };
+
+    const PLATFORM_TYPE_MAP = {
+      'A': 'Aerial (UAV / Glider)',
+      'U': 'Water / Marine (ROV)',
+      'G': 'Ground (UGV / Rover)',
+      'XU': 'Experimental',
+      'S': 'Static / Infrastructure',
+      'E': 'Electronics / Embedded',
+      'SW': 'Software / AI'
+    };
+
+    // Coupled Item Class -> Disruption Class & Risk Class mapping
+    const ITEM_CLASS_MATRIX = {
+      'SAFE': {
+        disruption: '1 // DARK',
+        risk: '1 // NOTICE',
+        stripe: 'acs-stripe-safe',
+        badge: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+      },
+      'EUCLID': {
+        disruption: '2 // VLAM',
+        risk: '2 // CAUTION',
+        stripe: 'acs-stripe-euclid',
+        badge: 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+      },
+      'KETER': {
+        disruption: '4 // EKHI',
+        risk: '4 // DANGER',
+        stripe: 'acs-stripe-keter',
+        badge: 'bg-red-500/15 text-red-300 border-red-500/30'
+      },
+      'THAUMIEL': {
+        disruption: '3 // KENEQ',
+        risk: '2 // CAUTION',
+        stripe: 'acs-stripe-thaumiel',
+        badge: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30'
+      },
+      'APOLLYON': {
+        disruption: '5 // AMIDA',
+        risk: '5 // CRITICAL',
+        stripe: 'acs-stripe-apollyon',
+        badge: 'bg-red-600/20 text-red-200 border-red-500/50'
+      },
+      'DECOMMISSIONED': {
+        disruption: '0 // NONE',
+        risk: '0 // NEUTRALIZED',
+        stripe: 'acs-stripe-decommissioned',
+        badge: 'bg-slate-600/20 text-slate-300 border-slate-500/40'
+      }
+    };
+
+    // ==========================================
+    // 2. REGISTERED OPERATIVE ROSTER (6-SEGMENT IDs)
+    // Format: [Rank]-[Branch]-[Wing A-F]-[Flat ###]-[Phone ####]-[UIN ####]
+    // ==========================================
+    const STAFF_DIRECTORY = {
+      'A-R-C-108-0980-4769': {
+        name: 'Pratesh',
+        title: 'Chief Administrator & Head of Research',
+        directives: [
+          'PRIORITY-1: Complete V-ROV [R-G-001] differential steering & IR telemetry bench checks prior to river deployment.',
+          'SOCIETY: Coordinate Shri Krishna Heights (Wings A–F) welfare & solar lighting maintenance schedule.',
+          'ADMIN: Enforce strict 5-Administrator cap and verify Research [R] ACS project logs.'
+        ]
+      },
+      'MX-D-B-204-5512-3321': {
+        name: 'Operative D-02',
+        title: 'Development Branch Moderator',
+        directives: [
+          'Assemble dual-L298N H-bridge motor driver harness with dedicated buck converter rail.',
+          'Validate ultrasonic obstacle stop thresholds under 20cm range.'
+        ]
+      },
+      'C-I-A-305-8842-6019': {
+        name: 'Operative I-03',
+        title: 'Intelligence & Defence Co-ordinator',
+        directives: [
+          'Maintain environmental monitoring readiness; keep river telemetry feed marked N/A until field placement.',
+          'Audit complex perimeter night-visibility zones across Wings A–F.'
+        ]
+      },
+      'M-W-D-402-7721-9044': {
+        name: 'Operative W-04',
+        title: 'Welfare Branch Manager',
+        directives: [
+          'Inspect Omnihouse [W-S-004] LDR solar switching unit after dusk.',
+          'Collect resident improvement proposals for society development.'
+        ]
+      },
+      'm-L-E-112-6630-1182': {
+        name: 'Operative L-05',
+        title: 'Logistics Branch Member',
+        directives: [
+          'Track battery pack charging cycles and spare BO gearmotor stock.',
+          'Prepare field transport kit for upcoming Badlapur testing trials.'
+        ]
+      }
+    };
+
+    // ==========================================
+    // 3. INITIAL PROJECTS REPOSITORY ([BRANCH]-[TYPE]-[###] + COUPLED ACS)
+    // ==========================================
+    const DEFAULT_PROJECTS = [
+      {
+        id: 'R-G-001',
+        branchCode: 'R',
+        platformCode: 'G',
+        serialNo: '001',
+        priority: 'P1 // CRITICAL',
+        title: 'Victorious ROV (V-ROV)',
+        status: 'ACTIVE',
+        domain: 'Ground UGV & River Telemetry',
+        itemClass: 'EUCLID',
+        clearance: 'LEVEL 4 // COMMAND',
+        summary: 'Ground-based Remotely Operated Vehicle built for river water-level monitoring, autonomous ultrasonic obstacle avoidance, and wireless remote operation.',
+        procedures: 'Verify 12V Li-ion pack polarity and L298N heatsink clearance prior to power-on. River sensor feed remains N/A until deployment.',
+        specs: {
+          architecture: 'Dual-motor tank-style differential steering + Arduino microcontroller',
+          sensors: 'HC-SR04 Ultrasonic Obstacle Avoidance + River Water-Level Probe (N/A pre-deploy)',
+          telemetry: 'I2C 1602 LCD live readout + Audible Buzzer Alarm + IR Remote Control',
+          mission: 'Rapid flood-warning & water-level monitoring for Badlapur community safety'
+        }
+      },
+      {
+        id: 'R-A-002',
+        branchCode: 'R',
+        platformCode: 'A',
+        serialNo: '002',
+        priority: 'P2 // RESEARCH',
+        title: 'Cooperative Dual-Drone Payload System',
+        status: 'FIELD TESTING',
+        domain: 'Aerial UAV Logistics',
+        itemClass: 'SAFE',
+        clearance: 'LEVEL 3 // RESEARCH',
+        summary: 'Sub-250g Nano-class dual-carrier aerial platform utilizing two 100g carrier UAVs to transport a 70g modular payload (270g total system mass).',
+        procedures: 'Operate strictly within line-of-sight airspace limits. Calibrate ESC throttle endpoints prior to dual-tether lift tests.',
+        specs: {
+          architecture: '2x 100g Nano-class carrier airframes + 70g detachable payload bay',
+          sensors: 'Barometric altitude hold + optical flow stabilization',
+          telemetry: '2.4GHz low-latency dual-link synchronization',
+          mission: 'Lightweight emergency supply & sensor drop research'
+        }
+      },
+      {
+        id: 'R-XU-003',
+        branchCode: 'R',
+        platformCode: 'XU',
+        serialNo: '003',
+        priority: 'P2 // EXPERIMENTAL',
+        title: 'Atmospheric Glider & Pneumatic Launcher',
+        status: 'RESEARCH ACS',
+        domain: 'Experimental Unclassified',
+        itemClass: 'EUCLID',
+        clearance: 'LEVEL 3 // RESEARCH',
+        summary: 'Water-propelled pneumatic carrier rocket paired with an autonomous gliding telemetry logger for upper-boundary atmospheric data collection.',
+        procedures: 'Pressurize launch vessel behind safety barrier only. Inspect release latch servo before pressure fill.',
+        specs: {
+          architecture: 'Pressurized water-propulsion booster + high-aspect-ratio release glider',
+          sensors: 'DHT11 temp/humidity logger + peak apogee accelerometer',
+          telemetry: 'Onboard flash data logging with post-recovery readout',
+          mission: 'Low-cost reusable atmospheric profiling for student STEM discovery'
+        }
+      },
+      {
+        id: 'W-S-004',
+        branchCode: 'W',
+        platformCode: 'S',
+        serialNo: '004',
+        priority: 'P3 // WELFARE',
+        title: 'Omnihouse Autonomous Solar Grid',
+        status: 'ACTIVE',
+        domain: 'Static Society Infrastructure',
+        itemClass: 'SAFE',
+        clearance: 'LEVEL 2 // RESTRICTED',
+        summary: 'Pure-hardware, microcontroller-free solar lighting array designed for zero-maintenance dusk-to-dawn society illumination at Omnihouse.',
+        procedures: 'Clean photovoltaic panel surface monthly. Verify series current-limiting resistors on all LED strings.',
+        specs: {
+          architecture: 'Pure analog comparator & photoresistor (LDR) switching circuit',
+          sensors: 'Calibrated cadmium-sulfide LDR ambient light detector',
+          telemetry: 'Hardware LED charge indicator with current-limiting resistors',
+          mission: 'Energy-independent common-area lighting for Shri Krishna Heights welfare'
+        }
+      }
+    ];
+
+    let projectsData = JSON.parse(localStorage.getItem('rdia_projects_v3')) || [...DEFAULT_PROJECTS];
+
+    // ==========================================
+    // 4. RESEARCH OBJECTS INVENTORY DATA
+    // ==========================================
+    const RESEARCH_OBJECTS = [
+      {
+        id: 'OBJ-001',
+        name: 'HC-SR04 Ultrasonic Array',
+        category: 'SENSORS',
+        status: 'CALIBRATED • BENCH READY',
+        unit: 'R-G-001 (V-ROV)',
+        bus: '5V TTL Trig/Echo',
+        branch: 'Research [R]',
+        desc: 'Dual-transducer 40kHz acoustic rangefinder mounted on Victorious ROV front bumper for autonomous obstacle avoidance (2cm–400cm range).'
+      },
+      {
+        id: 'OBJ-002',
+        name: 'I2C 1602 LCD Telemetry Module',
+        category: 'MODULES',
+        status: 'ONLINE • ADDR 0x27',
+        unit: 'R-G-001 (V-ROV)',
+        bus: 'I2C (SDA/SCL)',
+        branch: 'Development [D]',
+        desc: 'Backlit 16x2 character display wired via PCF8574 I2C backpack to output live distance and river status diagnostics.'
+      },
+      {
+        id: 'OBJ-003',
+        name: 'L298N Dual H-Bridge Driver',
+        category: 'MODULES',
+        status: 'VERIFIED • THERMAL OK',
+        unit: 'R-G-001 (V-ROV)',
+        bus: 'PWM + Digital IN1-IN4',
+        branch: 'Development [D]',
+        desc: 'High-current dual full-bridge motor driver controlling left and right BO gearmotor banks for tank-style skid steering.'
+      },
+      {
+        id: 'OBJ-004',
+        name: 'IR Receiver & Command Remote',
+        category: 'SENSORS',
+        status: 'ACTIVE • 38kHz NEC',
+        unit: 'R-G-001 (V-ROV)',
+        bus: 'Digital Interrupt Pin',
+        branch: 'Research [R]',
+        desc: '38kHz infrared demodulator enabling manual directional override and emergency halt commands during bench and ground trials.'
+      },
+      {
+        id: 'OBJ-005',
+        name: 'Pure-Hardware LDR Switch PCB',
+        category: 'PROTOTYPES',
+        status: 'DEPLOYED • OMNIHOUSE',
+        unit: 'W-S-004 (Solar Grid)',
+        bus: 'Analog Transistor Gate',
+        branch: 'Welfare [W]',
+        desc: 'Zero-MCU photoresistor switching circuit with current-limiting LED resistors for autonomous dusk-to-dawn society lighting.'
+      },
+      {
+        id: 'OBJ-006',
+        name: 'Pneumatic Release Servo Latch',
+        category: 'PROTOTYPES',
+        status: 'STAGE-2 TESTING',
+        unit: 'R-XU-003 (Glider)',
+        bus: 'SG90 50Hz PWM',
+        branch: 'Research [R]',
+        desc: 'Apogee-triggered micro-servo release mechanism separating the telemetry glider from its pneumatic carrier.'
+      }
+    ];
+
+    // ==========================================
+    // 5. RENDER PROJECTS & FILTERING
+    // ==========================================
+    const projectsGrid = document.getElementById('projects-grid');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+
+    function getStatusStyle(status) {
+      if (status === 'ACTIVE') return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30';
+      if (status === 'FIELD TESTING') return 'bg-amber-500/15 text-amber-400 border-amber-500/30';
+      return 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30';
+    }
+
+    function renderProjects(filter = 'ALL') {
+      const filtered = filter === 'ALL' ? projectsData : projectsData.filter(p => p.status === filter);
+      projectsGrid.innerHTML = filtered.map(project => {
+        const ic = ITEM_CLASS_MATRIX[project.itemClass] || ITEM_CLASS_MATRIX['SAFE'];
+        return `
+        <article class="glass-card rounded-xl p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-xs font-extrabold text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 px-2.5 py-0.5 rounded">${project.id}</span>
+                <span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded border ${ic.badge}">${project.itemClass}</span>
+              </div>
+              <span class="font-mono text-[11px] px-2.5 py-0.5 rounded-full border ${getStatusStyle(project.status)}">
+                ${project.status}
+              </span>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-1">${project.title}</h3>
+            <p class="font-mono text-[11px] text-slate-400 mb-3">${project.domain} • ${project.priority}</p>
+            <p class="text-sm text-slate-300 leading-relaxed mb-6">${project.summary}</p>
+          </div>
+
+          <div class="pt-4 border-t border-slateborder/80 flex items-center justify-between">
+            <span class="font-mono text-[11px] text-slate-500">DISRUPTION: <span class="text-slate-300">${ic.disruption}</span></span>
+            <button onclick="openProjectModal('${project.id}')" class="font-mono text-xs text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1 transition">
+              <span>VIEW ACS DOSSIER</span>
+              <span>&rarr;</span>
+            </button>
+          </div>
+        </article>
+      `}).join('');
+    }
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => {
+          b.classList.remove('bg-cyan-500', 'text-slate-950', 'font-semibold');
+          b.classList.add('bg-slatepanel', 'border', 'border-slateborder', 'text-slate-300');
         });
-    </script>
+        btn.classList.remove('bg-slatepanel', 'border', 'border-slateborder', 'text-slate-300');
+        btn.classList.add('bg-cyan-500', 'text-slate-950', 'font-semibold');
+        renderProjects(btn.dataset.filter);
+      });
+    });
+
+    // ==========================================
+    // 6. PROJECT ACS DOSSIER MODAL
+    // ==========================================
+    const projectModal = document.getElementById('project-modal');
+    const modalContent = document.getElementById('modal-content');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+
+    window.openProjectModal = function(projectId) {
+      const p = projectsData.find(item => item.id === projectId);
+      if (!p) return;
+      const ic = ITEM_CLASS_MATRIX[p.itemClass] || ITEM_CLASS_MATRIX['SAFE'];
+      const branchLabel = BRANCH_MAP[p.branchCode] || p.branchCode;
+      const platformLabel = PLATFORM_TYPE_MAP[p.platformCode] || p.platformCode;
+
+      modalContent.innerHTML = `
+        <div class="acs-container rounded-xl p-4 mb-5 font-mono">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3 mb-3">
+            <div>
+              <span class="text-[10px] text-slate-500 block">ITEM DESIGNATION</span>
+              <span class="text-lg font-extrabold text-white tracking-wider">${p.id}</span>
+              <span class="text-[10px] text-slate-400 block mt-0.5">${branchLabel} • ${platformLabel} • Serial #${p.serialNo}</span>
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] text-slate-500 block">CLEARANCE LEVEL</span>
+              <span class="text-xs font-bold text-cyan-400">${p.clearance}</span>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+            <div class="p-2 rounded ${ic.stripe} font-bold">
+              <span class="block text-[9px] opacity-80">ITEM CLASS</span>
+              <span>${p.itemClass}</span>
+            </div>
+            <div class="p-2 rounded bg-slate-900 border border-slate-700 text-slate-200">
+              <span class="block text-[9px] text-slate-400">DISRUPTION CLASS</span>
+              <span class="font-bold">${ic.disruption}</span>
+            </div>
+            <div class="p-2 rounded bg-slate-900 border border-slate-700 text-slate-200">
+              <span class="block text-[9px] text-slate-400">RISK CLASS</span>
+              <span class="font-bold">${ic.risk}</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="text-2xl font-bold text-white mb-2">${p.title}</h3>
+        <p class="text-xs font-mono text-cyan-400 mb-4">${p.domain} • ${p.status}</p>
+
+        <div class="space-y-4">
+          <div class="p-3.5 rounded-lg bg-obsidian border border-slateborder">
+            <p class="font-mono text-[10px] text-amber-400 uppercase mb-1">Special Operational &amp; Containment Procedures</p>
+            <p class="text-xs text-slate-300 leading-relaxed">${p.procedures}</p>
+          </div>
+
+          <div class="p-3.5 rounded-lg bg-obsidian border border-slateborder">
+            <p class="font-mono text-[10px] text-cyan-400 uppercase mb-1">Description &amp; Societal Impact</p>
+            <p class="text-xs text-slate-300 leading-relaxed">${p.summary}</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="p-3 rounded-lg bg-obsidian border border-slateborder">
+              <p class="font-mono text-[10px] text-slate-500 uppercase mb-1">System Architecture</p>
+              <p class="text-xs text-slate-200">${p.specs.architecture}</p>
+            </div>
+            <div class="p-3 rounded-lg bg-obsidian border border-slateborder">
+              <p class="font-mono text-[10px] text-slate-500 uppercase mb-1">Sensor Suite</p>
+              <p class="text-xs text-slate-200">${p.specs.sensors}</p>
+            </div>
+          </div>
+        </div>
+      `;
+
+      projectModal.classList.remove('hidden');
+      projectModal.classList.add('flex');
+    };
+
+    closeModalBtn.addEventListener('click', () => {
+      projectModal.classList.add('hidden');
+      projectModal.classList.remove('flex');
+    });
+
+    projectModal.addEventListener('click', (e) => {
+      if (e.target === projectModal) {
+        projectModal.classList.add('hidden');
+        projectModal.classList.remove('flex');
+      }
+    });
+
+    // ==========================================
+    // 7. RESEARCH OBJECTS SECTOR LOGIC
+    // ==========================================
+    const objectsGrid = document.getElementById('research-objects-grid');
+    const objFilterBtns = document.querySelectorAll('.obj-filter-btn');
+
+    function renderResearchObjects(cat = 'ALL') {
+      const list = cat === 'ALL' ? RESEARCH_OBJECTS : RESEARCH_OBJECTS.filter(o => o.category === cat);
+      objectsGrid.innerHTML = list.map((obj, idx) => `
+        <button
+          type="button"
+          onclick="inspectResearchObject('${obj.id}')"
+          class="text-left p-3.5 rounded-xl bg-obsidian border border-slateborder hover:border-cyan-400/60 transition flex flex-col justify-between"
+        >
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-1.5">
+              <span class="font-mono text-[10px] font-bold text-cyan-400">${obj.id}</span>
+              <span class="font-mono text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">${obj.category}</span>
+            </div>
+            <p class="text-xs font-bold text-white">${obj.name}</p>
+          </div>
+          <p class="font-mono text-[10px] text-emerald-400 mt-2 truncate">${obj.status}</p>
+        </button>
+      `).join('');
+    }
+
+    window.inspectResearchObject = function(objId) {
+      const obj = RESEARCH_OBJECTS.find(o => o.id === objId);
+      if (!obj) return;
+      document.getElementById('insp-obj-id').textContent = obj.id;
+      document.getElementById('insp-obj-name').textContent = obj.name;
+      document.getElementById('insp-obj-status').textContent = obj.status;
+      document.getElementById('insp-obj-desc').textContent = obj.desc;
+      document.getElementById('insp-obj-unit').textContent = obj.unit;
+      document.getElementById('insp-obj-bus').textContent = obj.bus;
+      document.getElementById('insp-obj-branch').textContent = obj.branch;
+    };
+
+    objFilterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        objFilterBtns.forEach(b => {
+          b.classList.remove('bg-cyan-500', 'text-slate-950', 'font-bold');
+          b.classList.add('bg-obsidian', 'border', 'border-slateborder', 'text-slate-300');
+        });
+        btn.classList.remove('bg-obsidian', 'border', 'border-slateborder', 'text-slate-300');
+        btn.classList.add('bg-cyan-500', 'text-slate-950', 'font-bold');
+        renderResearchObjects(btn.dataset.objFilter);
+      });
+    });
+
+    // ==========================================
+    // 8. 6-SEGMENT OPERATIVE ID PARSER & AUTHENTICATION
+    // Format: [Rank]-[Branch]-[Wing A-F]-[Flat ###]-[Phone ####]-[UIN ####]
+    // Ranks: A (Admin, 5 max), MX (Moderator), C (Co-ordinator), M (Manager), m (member)
+    // ==========================================
+    const staffForm = document.getElementById('staff-login-form');
+    const staffInput = document.getElementById('staff-id-input');
+    const charCounter = document.getElementById('char-counter');
+    const loginError = document.getElementById('login-error');
+    const loginErrorText = document.getElementById('login-error-text');
+    const loginCard = document.getElementById('login-card');
+
+    const portalLoginView = document.getElementById('portal-login-view');
+    const portalDashboardView = document.getElementById('portal-dashboard-view');
+    const logoutBtn = document.getElementById('logout-btn');
+
+    const navPortalDot = document.getElementById('nav-portal-dot');
+    const navAuthBadge = document.getElementById('nav-auth-badge');
+    const navAuthText = document.getElementById('nav-auth-text');
+
+    // Case-preserving auto-formatter for both 1-char ranks (A,C,M,m) and 2-char rank (MX)
+    function formatOperativeId(rawInput) {
+      const cleaned = rawInput.replace(/[^A-Za-z0-9]/g, '');
+      if (!cleaned) return '';
+
+      let rank = '';
+      let rest = '';
+
+      if (cleaned.startsWith('MX')) {
+        rank = 'MX';
+        rest = cleaned.slice(2);
+      } else {
+        rank = cleaned.charAt(0); // preserve exact case ('M' vs 'm')
+        rest = cleaned.slice(1);
+      }
+
+      const branch = rest.slice(0, 1).toUpperCase();
+      const wing = rest.slice(1, 2).toUpperCase();
+      const flat = rest.slice(2, 5);
+      const phone = rest.slice(5, 9);
+      const uin = rest.slice(9, 13);
+
+      const parts = [rank];
+      if (branch) parts.push(branch);
+      if (wing) parts.push(wing);
+      if (flat) parts.push(flat);
+      if (phone) parts.push(phone);
+      if (uin) parts.push(uin);
+
+      return parts.join('-');
+    }
+
+    function parseOperativeId(idStr) {
+      const regex = /^(A|MX|C|M|m)-([RDILCW])-([A-F])-(\d{3})-(\d{4})-(\d{4})$/;
+      const match = idStr.match(regex);
+      if (!match) return null;
+      return {
+        fullId: idStr,
+        rankCode: match[1],
+        rankLabel: RANK_MAP[match[1]],
+        branchCode: match[2],
+        branchLabel: BRANCH_MAP[match[2]],
+        wing: match[3],
+        flat: match[4],
+        phoneSuffix: match[5],
+        uin: match[6]
+      };
+    }
+
+    staffInput.addEventListener('input', (e) => {
+      const formatted = formatOperativeId(e.target.value);
+      e.target.value = formatted;
+      charCounter.textContent = `${formatted.length} / ${formatted.startsWith('MX') ? 20 : 19}`;
+      loginError.classList.add('hidden');
+    });
+
+    function showLoginError(message) {
+      loginErrorText.textContent = message;
+      loginError.classList.remove('hidden');
+      loginCard.classList.remove('animate-shake');
+      void loginCard.offsetWidth;
+      loginCard.classList.add('animate-shake');
+    }
+
+    function renderDashboardProjectList() {
+      const listEl = document.getElementById('dash-project-list');
+      document.getElementById('dash-project-count').textContent = `${String(projectsData.length).padStart(2, '0')} ITEMS`;
+      listEl.innerHTML = projectsData.map(p => {
+        const ic = ITEM_CLASS_MATRIX[p.itemClass] || ITEM_CLASS_MATRIX['SAFE'];
+        return `
+        <div class="p-3 rounded-lg bg-obsidian border border-slateborder flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-mono text-xs font-bold text-cyan-400">${p.id}</span>
+              <span class="text-xs font-bold text-white">${p.title}</span>
+            </div>
+            <p class="font-mono text-[10px] text-slate-400 mt-0.5">${p.domain} • Item Class: ${p.itemClass} (${ic.disruption})</p>
+          </div>
+          <button onclick="openProjectModal('${p.id}')" class="font-mono text-[11px] px-2.5 py-1 rounded bg-slatepanel border border-slateborder hover:border-cyan-500/40 text-cyan-400 transition">
+            INSPECT ACS
+          </button>
+        </div>
+      `}).join('');
+    }
+
+    function unlockPortal(parsed, staffRecord) {
+      // Populate Header
+      document.getElementById('dash-id').textContent = parsed.fullId;
+      document.getElementById('dash-name').textContent = staffRecord
+        ? staffRecord.name
+        : `Shri Krishna Heights Operative (Wing ${parsed.wing}-${parsed.flat})`;
+      document.getElementById('dash-role').textContent = staffRecord
+        ? `${staffRecord.title} • Wing ${parsed.wing}, Flat ${parsed.flat}`
+        : `${parsed.rankLabel} • ${parsed.branchLabel} Branch`;
+
+      // Populate 6 Decoded Segments
+      document.getElementById('dec-rank').textContent = `${parsed.rankCode} (${parsed.rankLabel})`;
+      document.getElementById('dec-branch').textContent = `${parsed.branchCode} (${parsed.branchLabel})`;
+      document.getElementById('dec-wing').textContent = `Wing ${parsed.wing}`;
+      document.getElementById('dec-flat').textContent = `Flat ${parsed.flat}`;
+      document.getElementById('dec-phone').textContent = `••••${parsed.phoneSuffix}`;
+      document.getElementById('dec-uin').textContent = parsed.uin;
+
+      // Branch-Gated Research Project Button (Granted when Branch === 'R' or Rank === 'A')
+      const addResearchBtn = document.getElementById('btn-open-acs-modal');
+      const nonResearchNotice = document.getElementById('non-research-notice');
+      if (parsed.branchCode === 'R' || parsed.rankCode === 'A') {
+        addResearchBtn.classList.remove('hidden');
+        nonResearchNotice.classList.add('hidden');
+      } else {
+        addResearchBtn.classList.add('hidden');
+        nonResearchNotice.classList.remove('hidden');
+      }
+
+      // Directives
+      const directivesList = document.getElementById('dash-directives');
+      const directives = staffRecord
+        ? staffRecord.directives
+        : [
+            `Report active status to ${parsed.branchLabel} Branch command for Shri Krishna Heights Wing ${parsed.wing}.`,
+            `Coordinate society welfare & project milestones under Badlapur 421503 charter.`
+          ];
+      directivesList.innerHTML = directives.map((item, idx) => `
+        <div class="p-3.5 rounded-lg bg-obsidian border border-slateborder flex items-start gap-3">
+          <span class="font-mono text-xs text-cyan-400 font-bold">0${idx + 1}</span>
+          <p class="text-sm text-slate-300 leading-relaxed">${item}</p>
+        </div>
+      `).join('');
+
+      renderResearchObjects('ALL');
+      renderDashboardProjectList();
+
+      // Switch Views
+      portalLoginView.classList.add('hidden');
+      portalDashboardView.classList.remove('hidden');
+
+      // Update Navbar
+      navPortalDot.classList.remove('bg-amber-400');
+      navPortalDot.classList.add('bg-emerald-400', 'live-dot');
+      navAuthBadge.classList.add('border-emerald-500/50', 'text-emerald-400');
+      navAuthText.textContent = `${parsed.rankCode}-${parsed.branchCode}-${parsed.wing}-${parsed.flat}`;
+    }
+
+    staffForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const enteredId = staffInput.value.trim();
+
+      if (!enteredId) {
+        showLoginError('INPUT REQUIRED: Enter your 6-segment Operative ID.');
+        return;
+      }
+
+      const parsed = parseOperativeId(enteredId);
+      if (!parsed) {
+        showLoginError('INVALID SCHEMA: Use Rank (A/MX/C/M/m) - Branch (R/D/I/L/C/W) - Wing (A–F) - Flat (###) - Phone (####) - UIN (####).');
+        return;
+      }
+
+      // Enforce strict 5-Administrator limit: only registered Rank 'A' IDs in STAFF_DIRECTORY are permitted
+      const registeredRecord = STAFF_DIRECTORY[enteredId];
+      if (parsed.rankCode === 'A' && !registeredRecord) {
+        showLoginError('ADMINISTRATOR CAP ENFORCED: Only the 05 authorized Rank [A] Administrator IDs are permitted.');
+        return;
+      }
+
+      unlockPortal(parsed, registeredRecord || null);
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      portalDashboardView.classList.add('hidden');
+      portalLoginView.classList.remove('hidden');
+      staffInput.value = '';
+      charCounter.textContent = '0 / 19';
+      loginError.classList.add('hidden');
+
+      navPortalDot.classList.remove('bg-emerald-400', 'live-dot');
+      navPortalDot.classList.add('bg-amber-400');
+      navAuthBadge.classList.remove('border-emerald-500/50', 'text-emerald-400');
+      navAuthText.textContent = 'STAFF ACCESS';
+    });
+
+    // ==========================================
+    // 9. SCP ACS RESEARCH PROJECT MODAL & LIVE PREVIEW
+    // ==========================================
+    const acsModal = document.getElementById('acs-modal');
+    const acsForm = document.getElementById('acs-project-form');
+    const acsBranchInput = document.getElementById('acs-branch');
+    const acsPlatformInput = document.getElementById('acs-platform');
+    const acsSerialInput = document.getElementById('acs-serial');
+    const acsItemClassSelect = document.getElementById('acs-item-class');
+    const acsClearanceSelect = document.getElementById('acs-clearance');
+
+    function formatSerial(raw) {
+      const digits = raw.replace(/\D/g, '').slice(0, 3);
+      return digits ? digits.padStart(3, '0') : '012';
+    }
+
+    function updateAcsLivePreview() {
+      const branch = acsBranchInput.value;
+      const platform = acsPlatformInput.value;
+      const serial = formatSerial(acsSerialInput.value);
+      const itemClass = acsItemClassSelect.value;
+      const coupled = ITEM_CLASS_MATRIX[itemClass] || ITEM_CLASS_MATRIX['SAFE'];
+      const clearance = acsClearanceSelect.value;
+
+      document.getElementById('acs-prev-code').textContent = `${branch}-${platform}-${serial}`;
+      document.getElementById('acs-prev-meta').textContent = `${clearance} // ${PLATFORM_TYPE_MAP[platform].toUpperCase()}`;
+      document.getElementById('acs-prev-itemclass').textContent = itemClass;
+      document.getElementById('acs-prev-disrupt').textContent = coupled.disruption;
+      document.getElementById('acs-prev-risk').textContent = coupled.risk;
+
+      const box = document.getElementById('acs-box-itemclass');
+      box.className = `p-2.5 rounded font-bold ${coupled.stripe}`;
+    }
+
+    [acsBranchInput, acsPlatformInput, acsSerialInput, acsItemClassSelect, acsClearanceSelect].forEach(el => {
+      el.addEventListener('input', updateAcsLivePreview);
+      el.addEventListener('change', updateAcsLivePreview);
+    });
+
+    window.openAcsModal = function() {
+      const nextNum = String(projectsData.length + 1).padStart(3, '0');
+      acsBranchInput.value = 'R';
+      acsPlatformInput.value = 'G';
+      acsSerialInput.value = nextNum;
+      updateAcsLivePreview();
+      acsModal.classList.remove('hidden');
+      acsModal.classList.add('flex');
+    };
+
+    window.closeAcsModal = function() {
+      acsModal.classList.add('hidden');
+      acsModal.classList.remove('flex');
+    };
+
+    acsForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const branchCode = acsBranchInput.value;
+      const platformCode = acsPlatformInput.value;
+      const serialNo = formatSerial(acsSerialInput.value);
+      const designation = `${branchCode}-${platformCode}-${serialNo}`;
+
+      const name = document.getElementById('acs-name').value.trim();
+      const type = document.getElementById('acs-type').value.trim();
+      const itemClass = acsItemClassSelect.value;
+      const clearance = acsClearanceSelect.value;
+      const procedures = document.getElementById('acs-procedures').value.trim();
+      const description = document.getElementById('acs-description').value.trim();
+
+      const newEntry = {
+        id: designation,
+        branchCode: branchCode,
+        platformCode: platformCode,
+        serialNo: serialNo,
+        priority: `ACS // ${itemClass}`,
+        title: name,
+        status: 'RESEARCH ACS',
+        domain: type,
+        itemClass: itemClass,
+        clearance: clearance,
+        summary: description,
+        procedures: procedures,
+        specs: {
+          architecture: `${PLATFORM_TYPE_MAP[platformCode]} (${type})`,
+          sensors: 'Registered under RDIA Research Telemetry Protocol',
+          telemetry: `Item Class: ${itemClass} • ${ITEM_CLASS_MATRIX[itemClass].disruption}`,
+          mission: 'Shri Krishna Heights & Societal Development Initiative'
+        }
+      };
+
+      projectsData.unshift(newEntry);
+      localStorage.setItem('rdia_projects_v3', JSON.stringify(projectsData));
+
+      renderProjects('ALL');
+      renderDashboardProjectList();
+      acsForm.reset();
+      closeAcsModal();
+    });
+
+    // ==========================================
+    // 10. V-ROV TELEMETRY SIMULATOR (RIVER FEED = N/A)
+    // ==========================================
+    const distSlider = document.getElementById('sim-dist-slider');
+    const distVal = document.getElementById('sim-dist-val');
+    const lcdLine1 = document.getElementById('lcd-line-1');
+    const lcdLine2 = document.getElementById('lcd-line-2');
+
+    function updateTelemetryDisplay() {
+      const dist = parseInt(distSlider.value, 10);
+      distVal.textContent = `${dist} cm`;
+
+      if (dist < 25) {
+        distVal.className = 'text-red-400 font-bold';
+        lcdLine1.textContent = `DIST:${String(dist).padStart(3, ' ')}cm STOP!`;
+      } else {
+        distVal.className = 'text-cyan-400 font-bold';
+        lcdLine1.textContent = `DIST:${String(dist).padStart(3, ' ')}cm  OK  `;
+      }
+
+      lcdLine2.textContent = 'RIVER: N/A      ';
+    }
+
+    distSlider.addEventListener('input', updateTelemetryDisplay);
+
+    // Initialize Views
+    renderProjects('ALL');
+    updateTelemetryDisplay();
+  </script>
 </body>
 </html>
