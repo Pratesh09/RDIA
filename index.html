@@ -26,36 +26,10 @@
       }
     };
   </script>
-  <style>
-    body {
-      background-color: #06090f;
-      color: #e2e8f0;
-      font-family: 'Inter', sans-serif;
-    }
-    .glass-card {
-      background: rgba(12, 18, 30, 0.9);
-      border: 1px solid #1a253a;
-      transition: border-color 0.2s ease;
-    }
-    .glass-card:hover {
-      border-color: rgba(6, 182, 212, 0.5);
-    }
-    .lcd-screen {
-      background: #05261e;
-      border: 2px solid #0f513f;
-      color: #34d399;
-    }
-    .acs-safe { background: #10b981; color: #041f18; }
-    .acs-euclid { background: #f59e0b; color: #1c1102; }
-    .acs-keter { background: #ef4444; color: #ffffff; }
-    .acs-thaumiel { background: #06b6d4; color: #041d24; }
-    .acs-apollyon { background: #dc2626; color: #ffffff; }
-    .acs-decommissioned { background: #64748b; color: #0f172a; }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body class="bg-obsidian text-slate-200 min-h-screen flex flex-col">
 
-  <!-- Navbar -->
   <header class="sticky top-0 z-40 border-b border-slateborder bg-obsidian/95 backdrop-blur">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <a href="#top" class="flex items-center gap-3">
@@ -82,7 +56,6 @@
 
   <main id="top" class="flex-grow">
 
-    <!-- Hero -->
     <section class="py-16 sm:py-24 border-b border-slateborder">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slatepanel border border-slateborder font-mono text-xs text-emerald-400 mb-6">
@@ -128,7 +101,6 @@
       </div>
     </section>
 
-    <!-- About & 6 Branches -->
     <section id="about" class="py-16 border-b border-slateborder">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <p class="font-mono text-xs text-cyan-400 uppercase tracking-widest mb-2">// ABOUT &amp; BRANCHES</p>
@@ -141,4 +113,220 @@
             <p class="text-sm text-slate-400">Experimental projects, discovery logs, ACS classification, and telemetry research.</p>
           </div>
           <div class="glass-card rounded-xl p-5">
-            <span class="font-mono text
+            <span class="font-mono text-xs font-bold text-emerald-400">BRANCH [D]</span>
+            <h3 class="text-lg font-bold text-white mt-1 mb-2">Development</h3>
+            <p class="text-sm text-slate-400">Building prototypes, circuits, rovers, gliders, and practical society tools.</p>
+          </div>
+          <div class="glass-card rounded-xl p-5">
+            <span class="font-mono text-xs font-bold text-indigo-400">BRANCH [I]</span>
+            <h3 class="text-lg font-bold text-white mt-1 mb-2">Intelligence (incl. Defence)</h3>
+            <p class="text-sm text-slate-400">Unified intelligence and defence covering safety, monitoring, and situational awareness.</p>
+          </div>
+          <div class="glass-card rounded-xl p-5">
+            <span class="font-mono text-xs font-bold text-amber-400">BRANCH [L]</span>
+            <h3 class="text-lg font-bold text-white mt-1 mb-2">Logistics</h3>
+            <p class="text-sm text-slate-400">Materials, parts, field readiness, and deployment coordination.</p>
+          </div>
+          <div class="glass-card rounded-xl p-5">
+            <span class="font-mono text-xs font-bold text-pink-400">BRANCH [C]</span>
+            <h3 class="text-lg font-bold text-white mt-1 mb-2">Cultural Committee</h3>
+            <p class="text-sm text-slate-400">Society events, exhibitions, and community engagement across Wings A–F.</p>
+          </div>
+          <div class="glass-card rounded-xl p-5">
+            <span class="font-mono text-xs font-bold text-teal-400">BRANCH [W]</span>
+            <h3 class="text-lg font-bold text-white mt-1 mb-2">Welfare</h3>
+            <p class="text-sm text-slate-400">Resident welfare, sustainable society upgrades, and community support.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="projects" class="py-16 border-b border-slateborder">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+          <div>
+            <p class="font-mono text-xs text-emerald-400 uppercase tracking-widest mb-2">// LATEST PROJECTS</p>
+            <h2 class="text-3xl font-bold text-white">Active RDIA Projects</h2>
+          </div>
+
+          <div class="flex flex-wrap gap-2" id="project-filters">
+            <button data-filter="ALL" class="filter-btn font-mono text-xs px-3 py-2 rounded-lg bg-cyan-500 text-slate-950 font-bold">ALL</button>
+            <button data-filter="ACTIVE" class="filter-btn font-mono text-xs px-3 py-2 rounded-lg bg-slatepanel border border-slateborder text-slate-300">ACTIVE</button>
+            <button data-filter="FIELD TESTING" class="filter-btn font-mono text-xs px-3 py-2 rounded-lg bg-slatepanel border border-slateborder text-slate-300">FIELD TESTING</button>
+            <button data-filter="RESEARCH ACS" class="filter-btn font-mono text-xs px-3 py-2 rounded-lg bg-slatepanel border border-slateborder text-slate-300">RESEARCH ACS</button>
+          </div>
+        </div>
+
+        <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+      </div>
+    </section>
+
+    <section id="staff-portal" class="py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <p class="font-mono text-xs text-cyan-400 uppercase tracking-widest mb-2">// STAFF PORTAL</p>
+        <h2 class="text-3xl font-bold text-white mb-6">Operative ID Access</h2>
+
+        <div id="portal-login-view" class="max-w-xl mx-auto">
+          <div id="login-card" class="glass-card rounded-2xl p-6 sm:p-8">
+            <form id="staff-login-form" class="space-y-4" autocomplete="off">
+              <div>
+                <label for="staff-id-input" class="block font-mono text-xs text-slate-400 uppercase mb-2">
+                  Enter Operative ID
+                </label>
+                <input
+                  type="text"
+                  id="staff-id-input"
+                  maxlength="20"
+                  placeholder="Enter Operative ID"
+                  autocomplete="off"
+                  spellcheck="false"
+                  class="w-full font-mono text-base px-4 py-3 rounded-xl bg-obsidian border border-slateborder focus:border-cyan-400 text-white placeholder-slate-600 outline-none"
+                />
+              </div>
+
+              <div id="login-error" class="hidden p-3 rounded-lg bg-red-500/15 border border-red-500/40 text-red-300 font-mono text-xs">
+                <span id="login-error-text"></span>
+              </div>
+
+              <button type="submit" class="w-full py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-mono font-bold text-xs uppercase tracking-wider transition">
+                Authenticate &rarr;
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div id="portal-dashboard-view" class="hidden space-y-6">
+          <div class="glass-card rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div class="font-mono text-xs text-emerald-400" id="dash-id"></div>
+              <h3 class="text-xl font-bold text-white mt-1" id="dash-name"></h3>
+              <p class="font-mono text-xs text-slate-400 mt-1" id="dash-decoded"></p>
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+              <button id="btn-open-acs" onclick="openAcsModal()" class="hidden px-4 py-2.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-mono text-xs font-bold">
+                + ADD RESEARCH PROJECT (ACS)
+              </button>
+              <button id="logout-btn" class="px-4 py-2.5 rounded-lg bg-red-500/15 border border-red-500/40 text-red-300 font-mono text-xs">
+                LOCK PORTAL
+              </button>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-6">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+              <h4 class="font-mono text-xs font-bold text-cyan-400 uppercase">// RESEARCH OBJECTS SECTOR</h4>
+              <div class="flex flex-wrap gap-1.5" id="obj-filters">
+                <button data-obj="ALL" class="obj-btn font-mono text-[11px] px-2.5 py-1 rounded bg-cyan-500 text-slate-950 font-bold">ALL</button>
+                <button data-obj="SENSORS" class="obj-btn font-mono text-[11px] px-2.5 py-1 rounded bg-obsidian border border-slateborder text-slate-300">SENSORS</button>
+                <button data-obj="MODULES" class="obj-btn font-mono text-[11px] px-2.5 py-1 rounded bg-obsidian border border-slateborder text-slate-300">MODULES</button>
+                <button data-obj="PROTOTYPES" class="obj-btn font-mono text-[11px] px-2.5 py-1 rounded bg-obsidian border border-slateborder text-slate-300">PROTOTYPES</button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+              <div id="objects-grid" class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+              <div class="p-4 rounded-xl bg-obsidian border border-slateborder">
+                <div class="font-mono text-[10px] text-cyan-400 uppercase mb-1">OBJECT INSPECTOR</div>
+                <div id="insp-id" class="font-mono text-xs text-slate-400">OBJ-001</div>
+                <div id="insp-name" class="text-base font-bold text-white mt-1">HC-SR04 Ultrasonic Sensor</div>
+                <div id="insp-status" class="font-mono text-[11px] text-emerald-400 mt-1 mb-2">READY</div>
+                <p id="insp-desc" class="text-xs text-slate-300 leading-relaxed">Ultrasonic obstacle detection unit for V-ROV.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-6">
+            <h4 class="font-mono text-xs font-bold text-emerald-400 uppercase mb-3">// V-ROV [R-G-001] I2C TELEMETRY</h4>
+            <div class="lcd-screen rounded-lg p-4 font-mono text-sm mb-4">
+              <div id="lcd-1">DIST: 120cm  OK</div>
+              <div id="lcd-2" class="mt-1">RIVER: N/A</div>
+            </div>
+            <label class="block font-mono text-xs text-slate-400 mb-1">
+              Ultrasonic Distance: <span id="dist-label" class="text-cyan-400">120 cm</span>
+            </label>
+            <input id="dist-slider" type="range" min="5" max="300" value="120" class="w-full accent-cyan-400" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="dossier-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80">
+    <div class="glass-card max-w-2xl w-full rounded-2xl p-6 relative max-h-[90vh] overflow-y-auto">
+      <button onclick="closeDossier()" class="absolute top-4 right-4 font-mono text-xs px-2.5 py-1 rounded bg-slate-800 text-slate-300">CLOSE</button>
+      <div id="dossier-body"></div>
+    </div>
+  </div>
+
+  <div id="acs-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/85">
+    <div class="glass-card max-w-2xl w-full rounded-2xl p-6 relative max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slateborder pb-3 mb-4">
+        <h3 class="text-lg font-bold text-white">New Research Project (ACS Template)</h3>
+        <button onclick="closeAcsModal()" class="font-mono text-xs px-2.5 py-1 rounded bg-slate-800 text-slate-300">CLOSE</button>
+      </div>
+
+      <div class="rounded-xl p-3.5 bg-obsidian border border-slateborder font-mono mb-4">
+        <div class="flex items-center justify-between text-xs mb-2">
+          <span id="prev-designation" class="text-base font-extrabold text-white">R-G-005</span>
+          <span id="prev-meta" class="text-cyan-400">Ground (G)</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+          <div id="prev-itemclass-box" class="p-2 rounded acs-safe font-bold">
+            ITEM CLASS: <span id="prev-itemclass">SAFE</span>
+          </div>
+          <div class="p-2 rounded bg-slate-900 border border-slate-700">
+            DISRUPTION: <span id="prev-disruption" class="text-emerald-400 font-bold">1 // DARK</span>
+          </div>
+          <div class="p-2 rounded bg-slate-900 border border-slate-700">
+            RISK: <span id="prev-risk" class="text-cyan-400 font-bold">1 // NOTICE</span>
+          </div>
+        </div>
+      </div>
+
+      <form id="acs-form" class="space-y-3">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <select id="f-branch" class="font-mono text-xs px-3 py-2.5 rounded-lg bg-obsidian border border-slateborder text-white">
+            <option value="R">R — Research</option>
+            <option value="D">D — Development</option>
+            <option value="I">I — Intelligence</option>
+            <option value="L">L — Logistics</option>
+            <option value="C">C — Cultural Committee</option>
+            <option value="W">W — Welfare</option>
+          </select>
+
+          <select id="f-typecode" class="font-mono text-xs px-3 py-2.5 rounded-lg bg-obsidian border border-slateborder text-white">
+            <option value="G">G — Ground</option>
+            <option value="A">A — Aerial</option>
+            <option value="U">U — Water</option>
+            <option value="XU">XU — Experimental</option>
+          </select>
+
+          <input id="f-serial" type="text" maxlength="3" placeholder="Serial No." required class="font-mono text-xs px-3 py-2.5 rounded-lg bg-obsidian border border-slateborder text-white placeholder-slate-500" />
+        </div>
+
+        <input id="f-name" type="text" placeholder="Project Name" required class="w-full text-xs px-3.5 py-2.5 rounded-lg bg-obsidian border border-slateborder text-white placeholder-slate-500" />
+        <input id="f-domain" type="text" placeholder="Type" required class="w-full text-xs px-3.5 py-2.5 rounded-lg bg-obsidian border border-slateborder text-white placeholder-slate-500" />
+
+        <select id="f-itemclass" class="w-full font-mono text-xs px-3 py-2.5 rounded-lg bg-obsidian border border-slateborder text-white">
+          <option value="SAFE">SAFE (Dark / Notice)</option>
+          <option value="EUCLID">EUCLID (Vlam / Caution)</option>
+          <option value="KETER">KETER (Ekhi / Danger)</option>
+          <option value="THAUMIEL">THAUMIEL (Keneq / Caution)</option>
+          <option value="APOLLYON">APOLLYON (Amida / Critical)</option>
+          <option value="DECOMMISSIONED">DECOMMISSIONED (None / Neutralized)</option>
+        </select>
+
+        <textarea id="f-desc" rows="3" placeholder="Description" required class="w-full text-xs px-3.5 py-2.5 rounded-lg bg-obsidian border border-slateborder text-white placeholder-slate-500"></textarea>
+
+        <button type="submit" class="w-full py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-mono font-bold text-xs uppercase">
+          Save Research Project
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="sketch.js"></script>
+</body>
+</html>
