@@ -23,6 +23,7 @@
       .cls-keter { background: #ef4444; color: #ffffff; }
       .cls-thaumiel { background: #06b6d4; color: #041d24; }
       .cls-apollyon { background: #dc2626; color: #ffffff; }
+      .cls-pending { background: #a855f7; color: #ffffff; }
       .cls-decommissioned { background: #64748b; color: #0f172a; }
     `;
     document.head.appendChild(style);
@@ -55,6 +56,7 @@
     const PROJECT_STATUSES = [
       'ACTIVE',
       'FIELD TESTING',
+      'PENDING',
       'INACTIVE',
       'DECOMMISSIONED'
     ];
@@ -65,6 +67,7 @@
       'CONTAINED',
       'DEPLOYED',
       'REGISTERED',
+      'PENDING',
       'INACTIVE',
       'DECOMMISSIONED'
     ];
@@ -75,6 +78,7 @@
       'KETER': { disruption: '4 // EKHI', risk: '4 // DANGER', cls: 'cls-keter' },
       'THAUMIEL': { disruption: '3 // KENEQ', risk: '2 // CAUTION', cls: 'cls-thaumiel' },
       'APOLLYON': { disruption: '5 // AMIDA', risk: '5 // CRITICAL', cls: 'cls-apollyon' },
+      'PENDING': { disruption: '0 // UNVERIFIED', risk: '1 // NOTICE', cls: 'cls-pending' },
       'DECOMMISSIONED': { disruption: '0 // NONE', risk: '0 // NEUTRALIZED', cls: 'cls-decommissioned' }
     };
 
@@ -190,14 +194,17 @@
       if (status === 'FIELD TESTING' || status === 'CONTAINED' || status === 'REGISTERED') {
         return 'text-amber-400 bg-amber-500/10 border-amber-500/30';
       }
+      if (status === 'PENDING') {
+        return 'text-purple-300 bg-purple-500/15 border-purple-500/30';
+      }
       if (status === 'INACTIVE') {
         return 'text-slate-300 bg-slate-500/15 border-slate-500/30';
       }
       return 'text-red-400 bg-red-500/15 border-red-500/30';
     }
 
-    let projects = JSON.parse(localStorage.getItem('rdia_projects_v6')) || [...INITIAL_PROJECTS];
-    let researchObjects = JSON.parse(localStorage.getItem('rdia_objects_v6')) || [...INITIAL_OBJECTS];
+    let projects = JSON.parse(localStorage.getItem('rdia_projects_v7')) || [...INITIAL_PROJECTS];
+    let researchObjects = JSON.parse(localStorage.getItem('rdia_objects_v7')) || [...INITIAL_OBJECTS];
     let currentOperative = null;
     let activeProjectFilter = 'ALL';
     let activeObjectFilter = 'ALL';
@@ -465,7 +472,7 @@
       </button>
     `).join('');
 
-    const PROJECT_FILTERS = ['ALL', 'ACTIVE', 'FIELD TESTING', 'INACTIVE', 'DECOMMISSIONED'];
+    const PROJECT_FILTERS = ['ALL', 'ACTIVE', 'FIELD TESTING', 'PENDING', 'INACTIVE', 'DECOMMISSIONED'];
     document.getElementById('project-filters').innerHTML = PROJECT_FILTERS.map((f, i) => `
       <button type="button" data-filter="${f}" class="filter-btn font-mono text-xs px-3 py-2 rounded-lg ${i === 0 ? 'bg-cyan-500 text-slate-950 font-bold' : 'bg-[#0c121e] border border-[#1a253a] text-slate-300'}">${f}</button>
     `).join('');
@@ -618,7 +625,7 @@
         p.domain = document.getElementById('ep-domain').value.trim();
         p.status = document.getElementById('ep-status').value;
         p.desc = document.getElementById('ep-desc').value.trim();
-        localStorage.setItem('rdia_projects_v6', JSON.stringify(projects));
+        localStorage.setItem('rdia_projects_v7', JSON.stringify(projects));
         renderProjects(activeProjectFilter);
         renderPortalProjects();
         closeEditScreen();
@@ -682,7 +689,7 @@
         o.itemClass = document.getElementById('eo-class').value;
         o.desc = document.getElementById('eo-desc').value.trim();
         selectedObjectUid = o.uid;
-        localStorage.setItem('rdia_objects_v6', JSON.stringify(researchObjects));
+        localStorage.setItem('rdia_objects_v7', JSON.stringify(researchObjects));
         renderObjects(activeObjectFilter);
         renderPortalObjects();
         closeEditScreen();
@@ -906,7 +913,7 @@
         status: document.getElementById('p-status').value,
         desc: document.getElementById('p-desc').value.trim()
       });
-      localStorage.setItem('rdia_projects_v6', JSON.stringify(projects));
+      localStorage.setItem('rdia_projects_v7', JSON.stringify(projects));
       renderProjects(activeProjectFilter);
       renderPortalProjects();
       toggleCreatePanel(null);
@@ -947,7 +954,7 @@
       };
       researchObjects.unshift(newObj);
       selectedObjectUid = newObj.uid;
-      localStorage.setItem('rdia_objects_v6', JSON.stringify(researchObjects));
+      localStorage.setItem('rdia_objects_v7', JSON.stringify(researchObjects));
       renderObjects(activeObjectFilter);
       renderPortalObjects();
       toggleCreatePanel(null);
