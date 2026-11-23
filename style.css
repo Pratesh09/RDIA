@@ -1,51 +1,13 @@
-body {
-  background-color: #06090f;
-  color: #e2e8f0;
-  font-family: 'Inter', sans-serif;
-}
-
-.glass-card {
-  background: rgba(12, 18, 30, 0.9);
-  border: 1px solid #1a253a;
-  transition: border-color 0.2s ease;
-}
-
-.glass-card:hover {
-  border-color: rgba(6, 182, 212, 0.5);
-}
-
-.lcd-screen {
-  background: #05261e;
-  border: 2px solid #0f513f;
-  color: #34d399;
-}
-
-.acs-safe {
-  background: #10b981;
-  color: #041f18;
-}
-
-.acs-euclid {
-  background: #f59e0b;
-  color: #1c1102;
-}
-
-.acs-keter {
-  background: #ef4444;
-  color: #ffffff;
-}
-
-.acs-thaumiel {
-  background: #06b6d4;
-  color: #041d24;
-}
-
-.acs-apollyon {
-  background: #dc2626;
-  color: #ffffff;
-}
-
-.acs-decommissioned {
-  background: #64748b;
-  color: #0f172a;
-}
+body { background-color: #06090f; color: #e2e8f0; font-family: 'Inter', sans-serif; }
+.font-mono { font-family: 'JetBrains Mono', monospace; }
+.glass-card { background: rgba(12, 18, 30, 0.9); border: 1px solid #1a253a; transition: border-color 0.2s ease, opacity 0.45s ease, transform 0.45s ease; }
+.glass-card:hover { border-color: rgba(6, 182, 212, 0.5); }
+.lcd-screen { background: #05261e; border: 2px solid #0f513f; color: #34d399; }
+.cls-safe { background: #10b981; color: #041f18; }
+.cls-euclid { background: #f59e0b; color: #1c1102; }
+.cls-keter { background: #ef4444; color: #ffffff; }
+.cls-thaumiel { background: #06b6d4; color: #041d24; }
+.cls-pending { background: #a855f7; color: #ffffff; }
+.cls-decommissioned { background: #64748b; color: #0f172a; }
+.reveal-card { opacity: 0; transform: translateY(18px); }
+.reveal-card.is-visible { opacity: 1; transform: translateY(0); }
