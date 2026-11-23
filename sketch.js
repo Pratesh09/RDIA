@@ -1,20 +1,3 @@
-const style = document.createElement('style');
-style.textContent = `
-  body { background-color: #06090f; color: #e2e8f0; font-family: 'Inter', sans-serif; }
-  .font-mono { font-family: 'JetBrains Mono', monospace; }
-  .glass-card { background: rgba(12, 18, 30, 0.9); border: 1px solid #1a253a; transition: border-color 0.2s ease; }
-  .glass-card:hover { border-color: rgba(6, 182, 212, 0.5); }
-  .lcd-screen { background: #05261e; border: 2px solid #0f513f; color: #34d399; }
-  .cls-safe { background: #10b981; color: #041f18; }
-  .cls-euclid { background: #f59e0b; color: #1c1102; }
-  .cls-keter { background: #ef4444; color: #ffffff; }
-  .cls-thaumiel { background: #06b6d4; color: #041d24; }
-  .cls-apollyon { background: #dc2626; color: #ffffff; }
-  .cls-pending { background: #a855f7; color: #ffffff; }
-  .cls-decommissioned { background: #64748b; color: #0f172a; }
-`;
-document.head.appendChild(style);
-
 const RANKS = {
   'A': 'Administrator (5 max)',
   'MX': 'Moderator',
@@ -64,13 +47,15 @@ const ITEM_CLASSES = {
   'EUCLID': { disruption: '2 // VLAM', risk: '2 // CAUTION', cls: 'cls-euclid' },
   'KETER': { disruption: '4 // EKHI', risk: '4 // DANGER', cls: 'cls-keter' },
   'THAUMIEL': { disruption: '3 // KENEQ', risk: '2 // CAUTION', cls: 'cls-thaumiel' },
-  'APOLLYON': { disruption: '5 // AMIDA', risk: '5 // CRITICAL', cls: 'cls-apollyon' },
   'PENDING': { disruption: '0 // UNVERIFIED', risk: '1 // NOTICE', cls: 'cls-pending' },
   'DECOMMISSIONED': { disruption: '0 // NONE', risk: '0 // NEUTRALIZED', cls: 'cls-decommissioned' }
 };
 
 const ADMINS = {
-  'A-R-C-108-0980-4769': 'Pratesh (Chief Administrator)'
+  'A-R-C-108-0980-4769': 'Pratesh (Chief Administrator)',
+  'A-I-C-610-2242-3547': 'Administrator (Intelligence)',
+  'A-L-101-9438': 'Administrator (Logistics)',
+  'A-D-C-610-2242-3056': 'Administrator (Development)'
 };
 
 const INITIAL_PROJECTS = [
@@ -121,7 +106,7 @@ const INITIAL_OBJECTS = [
     uid: 'obj-1',
     serial: '001',
     name: 'HC-SR04 Ultrasonic Array',
-    cat: 'SENSORS',
+    cat: 'TERRESTRIAL',
     itemClass: 'SAFE',
     status: 'CALIBRATED',
     desc: '40kHz acoustic distance sensor array mounted on V-ROV [R-G-001] for autonomous obstacle detection.'
@@ -130,7 +115,7 @@ const INITIAL_OBJECTS = [
     uid: 'obj-2',
     serial: '002',
     name: 'I2C 1602 LCD Telemetry Unit',
-    cat: 'MODULES',
+    cat: 'TERRESTRIAL',
     itemClass: 'SAFE',
     status: 'ONLINE',
     desc: 'Backlit 16x2 character telemetry screen displaying live ultrasonic distance and N/A river status.'
@@ -139,7 +124,7 @@ const INITIAL_OBJECTS = [
     uid: 'obj-3',
     serial: '003',
     name: 'Pressurized Pneumatic Booster Core',
-    cat: 'PROTOTYPES',
+    cat: 'UNEXPLAINED',
     itemClass: 'EUCLID',
     status: 'CONTAINED',
     desc: 'High-pressure water-propelled launch vessel requiring barrier clearance during pressurization trials.'
@@ -148,7 +133,7 @@ const INITIAL_OBJECTS = [
     uid: 'obj-4',
     serial: '004',
     name: 'Pure-Hardware LDR Solar Switch',
-    cat: 'PROTOTYPES',
+    cat: 'EXTRA TERRESTRIAL',
     itemClass: 'SAFE',
     status: 'DEPLOYED',
     desc: 'Zero-MCU photoresistor comparator circuit governing dusk-to-dawn society illumination.'
@@ -230,8 +215,27 @@ function getStatusBadgeStyle(status) {
   return 'text-red-400 bg-red-500/15 border-red-500/30';
 }
 
-let projects = readStore('rdia_projects_v7', INITIAL_PROJECTS);
-let researchObjects = readStore('rdia_objects_v7', INITIAL_OBJECTS);
+const cardObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        cardObserver.unobserve(entry.target);
+      }
+    });
+  },
+  { threshold: 0.12, rootMargin: '0px 0px -20px 0px' }
+);
+
+function observeRevealCards() {
+  document.querySelectorAll('.reveal-card:not(.is-visible)').forEach((el, idx) => {
+    el.style.transitionDelay = `${Math.min(idx * 60, 240)}ms`;
+    cardObserver.observe(el);
+  });
+}
+
+let projects = readStore('rdia_projects_v8', INITIAL_PROJECTS);
+let researchObjects = readStore('rdia_objects_v8', INITIAL_OBJECTS);
 let currentOperative = null;
 let activeProjectFilter = 'ALL';
 let activeObjectFilter = 'ALL';
@@ -415,9 +419,9 @@ app.innerHTML = `
                 <input id="o-serial" type="text" maxlength="3" placeholder="Serial No." required class="font-mono text-xs px-3 py-2.5 rounded-lg bg-[#06090f] border border-[#1a253a] text-white placeholder-slate-500" />
                 <input id="o-name" type="text" placeholder="Object Name" required class="text-xs px-3.5 py-2.5 rounded-lg bg-[#06090f] border border-[#1a253a] text-white placeholder-slate-500" />
                 <select id="o-cat" class="font-mono text-xs px-3 py-2.5 rounded-lg bg-[#06090f] border border-[#1a253a] text-white">
-                  <option value="SENSORS">SENSORS</option>
-                  <option value="MODULES">MODULES</option>
-                  <option value="PROTOTYPES">PROTOTYPES</option>
+                  <option value="TERRESTRIAL">TERRESTRIAL</option>
+                  <option value="EXTRA TERRESTRIAL">EXTRA TERRESTRIAL</option>
+                  <option value="UNEXPLAINED">UNEXPLAINED</option>
                 </select>
                 <select id="o-status" class="font-mono text-xs px-3 py-2.5 rounded-lg bg-[#06090f] border border-[#1a253a] text-white"></select>
               </div>
@@ -493,7 +497,7 @@ document.getElementById('project-filters').innerHTML = PROJECT_FILTERS.map((f, i
   <button type="button" data-filter="${f}" class="filter-btn font-mono text-xs px-3 py-2 rounded-lg ${i === 0 ? 'bg-cyan-500 text-slate-950 font-bold' : 'bg-[#0c121e] border border-[#1a253a] text-slate-300'}">${f}</button>
 `).join('');
 
-const OBJ_FILTERS = ['ALL', 'SENSORS', 'MODULES', 'PROTOTYPES'];
+const OBJ_FILTERS = ['ALL', 'TERRESTRIAL', 'EXTRA TERRESTRIAL', 'UNEXPLAINED'];
 document.getElementById('obj-filters').innerHTML = OBJ_FILTERS.map((f, i) => `
   <button type="button" data-obj="${f}" class="obj-btn font-mono text-[11px] px-2.5 py-1 rounded ${i === 0 ? 'bg-cyan-500 text-slate-950 font-bold' : 'bg-[#06090f] border border-[#1a253a] text-slate-300'}">${f}</button>
 `).join('');
@@ -511,7 +515,7 @@ function renderProjects(filter = 'ALL') {
   grid.innerHTML = list.map(p => {
     const code = formatProjectCode(p);
     return `
-      <div class="glass-card rounded-xl p-6 flex flex-col justify-between">
+      <div class="glass-card reveal-card rounded-xl p-6 flex flex-col justify-between">
         <div>
           <div class="flex items-center justify-between gap-2 mb-3">
             <span class="font-mono text-xs font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 px-2.5 py-0.5 rounded">${code}</span>
@@ -525,6 +529,7 @@ function renderProjects(filter = 'ALL') {
       </div>
     `;
   }).join('');
+  observeRevealCards();
 }
 
 document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -641,7 +646,7 @@ window.openEditProject = function(uid) {
     p.domain = document.getElementById('ep-domain').value.trim();
     p.status = document.getElementById('ep-status').value;
     p.desc = document.getElementById('ep-desc').value.trim();
-    writeStore('rdia_projects_v7', projects);
+    writeStore('rdia_projects_v8', projects);
     renderProjects(activeProjectFilter);
     renderPortalProjects();
     closeEditScreen();
@@ -669,9 +674,9 @@ window.openEditObject = function(uid) {
         <div>
           <label class="block font-mono text-[10px] text-slate-400 mb-1">CATEGORY</label>
           <select id="eo-cat" class="w-full font-mono text-xs px-3 py-2 rounded-lg bg-[#06090f] border border-[#1a253a] text-white">
-            <option value="SENSORS" ${o.cat === 'SENSORS' ? 'selected' : ''}>SENSORS</option>
-            <option value="MODULES" ${o.cat === 'MODULES' ? 'selected' : ''}>MODULES</option>
-            <option value="PROTOTYPES" ${o.cat === 'PROTOTYPES' ? 'selected' : ''}>PROTOTYPES</option>
+            <option value="TERRESTRIAL" ${o.cat === 'TERRESTRIAL' ? 'selected' : ''}>TERRESTRIAL</option>
+            <option value="EXTRA TERRESTRIAL" ${o.cat === 'EXTRA TERRESTRIAL' ? 'selected' : ''}>EXTRA TERRESTRIAL</option>
+            <option value="UNEXPLAINED" ${o.cat === 'UNEXPLAINED' ? 'selected' : ''}>UNEXPLAINED</option>
           </select>
         </div>
         <div>
@@ -705,7 +710,7 @@ window.openEditObject = function(uid) {
     o.itemClass = document.getElementById('eo-class').value;
     o.desc = document.getElementById('eo-desc').value.trim();
     selectedObjectUid = o.uid;
-    writeStore('rdia_objects_v7', researchObjects);
+    writeStore('rdia_objects_v8', researchObjects);
     renderObjects(activeObjectFilter);
     renderPortalObjects();
     closeEditScreen();
@@ -776,10 +781,15 @@ function formatId(raw) {
   }
   const branch = rest.slice(0, 1).toUpperCase();
   const wing = rest.slice(1, 2).toUpperCase();
-  const flat = rest.slice(2, 5);
-  const phone = rest.slice(5, 9);
-  const uin = rest.slice(9, 13);
-  return [rank, branch, wing, flat, phone, uin].filter(Boolean).join('-');
+  if (/[A-F]/.test(wing)) {
+    const flat = rest.slice(2, 5);
+    const phone = rest.slice(5, 9);
+    const uin = rest.slice(9, 13);
+    return [rank, branch, wing, flat, phone, uin].filter(Boolean).join('-');
+  }
+  const codeA = rest.slice(1, 4);
+  const codeB = rest.slice(4, 8);
+  return [rank, branch, codeA, codeB].filter(Boolean).join('-');
 }
 
 idInput.addEventListener('input', e => {
@@ -788,19 +798,35 @@ idInput.addEventListener('input', e => {
 });
 
 function parseId(val) {
-  const m = val.match(/^(A|MX|C|M|m)-([RDILCW])-([A-F])-(\d{3})-(\d{4})-(\d{4})$/);
-  if (!m) return null;
-  return {
-    full: val,
-    rank: m[1],
-    rankName: RANKS[m[1]],
-    branch: m[2],
-    branchName: BRANCHES[m[2]],
-    wing: m[3],
-    flat: m[4],
-    phone: m[5],
-    uin: m[6]
-  };
+  const standard = val.match(/^(A|MX|C|M|m)-([RDILCW])-([A-F])-(\d{3})-(\d{4})-(\d{4})$/);
+  if (standard) {
+    return {
+      full: val,
+      rank: standard[1],
+      rankName: RANKS[standard[1]],
+      branch: standard[2],
+      branchName: BRANCHES[standard[2]],
+      wing: standard[3],
+      flat: standard[4],
+      phone: standard[5],
+      uin: standard[6]
+    };
+  }
+  const compact = val.match(/^(A|MX|C|M|m)-([RDILCW])-(\d{3})-(\d{4})$/);
+  if (compact) {
+    return {
+      full: val,
+      rank: compact[1],
+      rankName: RANKS[compact[1]],
+      branch: compact[2],
+      branchName: BRANCHES[compact[2]],
+      wing: 'N/A',
+      flat: compact[3],
+      phone: 'N/A',
+      uin: compact[4]
+    };
+  }
+  return null;
 }
 
 document.getElementById('staff-login-form').addEventListener('submit', e => {
@@ -834,7 +860,7 @@ document.getElementById('staff-login-form').addEventListener('submit', e => {
 
   document.getElementById('portal-login-view').classList.add('hidden');
   document.getElementById('portal-dashboard-view').classList.remove('hidden');
-  document.getElementById('nav-badge').textContent = `${parsed.rank}-${parsed.branch}-${parsed.wing}-${parsed.flat}`;
+  document.getElementById('nav-badge').textContent = `${parsed.rank}-${parsed.branch}-${parsed.flat}`;
   renderPortalProjects();
   renderPortalObjects();
 });
@@ -855,7 +881,7 @@ function renderObjects(cat = 'ALL') {
   document.getElementById('objects-grid').innerHTML = list.map(o => {
     const ic = ITEM_CLASSES[o.itemClass] || ITEM_CLASSES['SAFE'];
     return `
-      <button type="button" onclick="selectObj('${o.uid}')" class="text-left p-4 rounded-xl bg-[#06090f] border border-[#1a253a] hover:border-cyan-400/50 transition">
+      <button type="button" onclick="selectObj('${o.uid}')" class="reveal-card text-left p-4 rounded-xl bg-[#06090f] border border-[#1a253a] hover:border-cyan-400/50 transition">
         <div class="flex items-center justify-between gap-2">
           <span class="font-mono text-[10px] text-cyan-400">${formatObjectId(o)} • ${o.cat}</span>
           <span class="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded ${ic.cls}">${o.itemClass}</span>
@@ -870,6 +896,7 @@ function renderObjects(cat = 'ALL') {
     const match = list.find(x => x.uid === selectedObjectUid) || list[0];
     selectObj(match.uid);
   }
+  observeRevealCards();
 }
 
 window.selectObj = function(uid) {
@@ -929,7 +956,7 @@ document.getElementById('project-form').addEventListener('submit', e => {
     status: document.getElementById('p-status').value,
     desc: document.getElementById('p-desc').value.trim()
   });
-  writeStore('rdia_projects_v7', projects);
+  writeStore('rdia_projects_v8', projects);
   renderProjects(activeProjectFilter);
   renderPortalProjects();
   toggleCreatePanel(null);
@@ -970,7 +997,7 @@ document.getElementById('object-form').addEventListener('submit', e => {
   };
   researchObjects.unshift(newObj);
   selectedObjectUid = newObj.uid;
-  writeStore('rdia_objects_v7', researchObjects);
+  writeStore('rdia_objects_v8', researchObjects);
   renderObjects(activeObjectFilter);
   renderPortalObjects();
   toggleCreatePanel(null);
