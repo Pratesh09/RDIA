@@ -218,21 +218,39 @@ function getStatusBadgeStyle(status) {
 const cardObserver = new IntersectionObserver(
   (entries) => {
     entries.forEach((entry) => {
-      if (entry.isIntersecting) {
+      if (entry.isIntersecting || entry.boundingClientRect.top < window.innerHeight) {
         entry.target.classList.add('is-visible');
         cardObserver.unobserve(entry.target);
       }
     });
   },
-  { threshold: 0.12, rootMargin: '0px 0px -20px 0px' }
+  { threshold: 0.05, rootMargin: '0px 0px 40px 0px' }
 );
 
-function observeRevealCards() {
-  document.querySelectorAll('.reveal-card:not(.is-visible)').forEach((el, idx) => {
-    el.style.transitionDelay = `${Math.min(idx * 60, 240)}ms`;
-    cardObserver.observe(el);
+function checkVisibleOnScroll() {
+  document.querySelectorAll('.reveal-card:not(.is-visible)').forEach((el) => {
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight * 0.92 && rect.bottom > 0) {
+      el.classList.add('is-visible');
+      cardObserver.unobserve(el);
+    }
   });
 }
+
+function observeRevealCards(resetVisibility = false) {
+  document.querySelectorAll('.reveal-card').forEach((el, idx) => {
+    if (resetVisibility) {
+      el.classList.remove('is-visible');
+    }
+    el.style.transitionDelay = `${Math.min(idx * 60, 240)}ms`;
+    cardObserver.unobserve(el);
+    cardObserver.observe(el);
+  });
+  requestAnimationFrame(() => checkVisibleOnScroll());
+}
+
+window.addEventListener('scroll', checkVisibleOnScroll, { passive: true });
+window.addEventListener('resize', checkVisibleOnScroll, { passive: true });
 
 let projects = readStore('rdia_projects_v8', INITIAL_PROJECTS);
 let researchObjects = readStore('rdia_objects_v8', INITIAL_OBJECTS);
@@ -475,8 +493,14 @@ function showScreen(name) {
     const el = document.getElementById(`screen-${s}`);
     if (el) el.classList.toggle('hidden', s !== name);
   });
-  if (name === 'projects') renderProjects(activeProjectFilter);
-  if (name === 'objects') renderObjects(activeObjectFilter);
+  if (name === 'projects') {
+    renderProjects(activeProjectFilter);
+    observeRevealCards(true);
+  }
+  if (name === 'objects') {
+    renderObjects(activeObjectFilter);
+    observeRevealCards(true);
+  }
   if (name === 'portal' && currentOperative) {
     renderPortalProjects();
     renderPortalObjects();
@@ -529,7 +553,7 @@ function renderProjects(filter = 'ALL') {
       </div>
     `;
   }).join('');
-  observeRevealCards();
+  observeRevealCards(true);
 }
 
 document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -896,7 +920,7 @@ function renderObjects(cat = 'ALL') {
     const match = list.find(x => x.uid === selectedObjectUid) || list[0];
     selectObj(match.uid);
   }
-  observeRevealCards();
+  observeRevealCards(true);
 }
 
 window.selectObj = function(uid) {
