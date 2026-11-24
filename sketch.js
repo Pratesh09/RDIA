@@ -1,5 +1,5 @@
 const RANKS = {
-  'A': 'Administrator (5 max)',
+  'A': 'Administrator (6 max)',
   'MX': 'Moderator',
   'C': 'Co-ordinator',
   'M': 'Manager',
@@ -56,7 +56,8 @@ const ADMINS = {
   'A-R-D-104-2346-6769': 'Shreyash (Administrator - Research)',
   'A-I-C-610-2242-3547': 'Shubh/Ayushman (Administrator - Intelligence)',
   'A-L-A-101-9438-7660': 'Utkarsh (Administrator - Logistics)',
-  'A-D-C-610-2242-3056': 'Saksham/Abyuday (Administrator - Development)'
+  'A-D-C-610-2242-3056': 'Saksham/Abyuday (Administrator - Development)',
+  'A-C-C-308-0000-4293': 'Administrator (Cultural Committee)'
 };
 
 const INITIAL_PROJECTS = [
