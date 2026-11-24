@@ -57,7 +57,7 @@ const ADMINS = {
   'A-I-C-610-2242-3547': 'Shubh/Ayushman (Administrator - Intelligence)',
   'A-L-A-101-9438-7660': 'Utkarsh (Administrator - Logistics)',
   'A-D-C-610-2242-3056': 'Saksham/Abyuday (Administrator - Development)',
-  'A-C-C-308-0000-4293': 'Administrator (Cultural Committee)'
+  'A-C-C-308-0000-4293': 'Aradhy (Administrator - Cultural Committee)'
 };
 
 const INITIAL_PROJECTS = [
