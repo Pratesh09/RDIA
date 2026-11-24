@@ -53,6 +53,7 @@ const ITEM_CLASSES = {
 
 const ADMINS = {
   'A-R-C-108-0980-4769': 'Pratesh (Chief Administrator)',
+  'A-R-D-104-2346-6769': 'Administrator (Research)',
   'A-I-C-610-2242-3547': 'Administrator (Intelligence)',
   'A-L-101-9438': 'Administrator (Logistics)',
   'A-D-C-610-2242-3056': 'Administrator (Development)'
@@ -297,9 +298,7 @@ app.innerHTML = `
             "RDIA is an organization for the welfare of apartment complex Shri Krishna Heights, Hendrepada badlapur 421503 we help prduce projects and discover new things this innovation helps us to progress in the development of society"
           </p>
           <div class="flex flex-wrap gap-4">
-            <button type="button" onclick="showScreen('projects')" class="px-5 py-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold text-sm transition">Projects Screen</button>
-            <button type="button" onclick="showScreen('objects')" class="px-5 py-3 rounded-lg bg-[#0c121e] hover:bg-slate-800 border border-[#1a253a] text-slate-200 font-mono text-xs uppercase tracking-wider transition">Research Objects Screen</button>
-            <button type="button" onclick="showScreen('portal')" class="px-5 py-3 rounded-lg bg-[#0c121e] hover:bg-slate-800 border border-cyan-500/40 text-cyan-400 font-mono text-xs uppercase tracking-wider transition">Staff Portal Screen</button>
+            <button type="button" onclick="showScreen('projects')" class="px-5 py-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold text-sm transition">Projects</button>
           </div>
         </div>
 
