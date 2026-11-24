@@ -53,10 +53,10 @@ const ITEM_CLASSES = {
 
 const ADMINS = {
   'A-R-C-108-0980-4769': 'Pratesh (Chief Administrator)',
-  'A-R-D-104-2346-6769': 'Administrator (Research)',
-  'A-I-C-610-2242-3547': 'Administrator (Intelligence)',
-  'A-L-101-9438': 'Administrator (Logistics)',
-  'A-D-C-610-2242-3056': 'Administrator (Development)'
+  'A-R-D-104-2346-6769': 'Shreyash (Administrator - Research)',
+  'A-I-C-610-2242-3547': 'Shubh/Ayushman (Administrator - Intelligence)',
+  'A-L-A-101-9438-7660': 'Utkarsh (Administrator - Logistics)',
+  'A-D-C-610-2242-3056': 'Saksham/Abyuday (Administrator - Development)'
 };
 
 const INITIAL_PROJECTS = [
@@ -852,9 +852,18 @@ function parseId(val) {
   return null;
 }
 
+function findAdminLabel(idVal) {
+  if (Object.prototype.hasOwnProperty.call(ADMINS, idVal)) {
+    return ADMINS[idVal];
+  }
+  const upperVal = idVal.toUpperCase();
+  const matchedKey = Object.keys(ADMINS).find(k => k.toUpperCase() === upperVal);
+  return matchedKey ? ADMINS[matchedKey] : null;
+}
+
 document.getElementById('staff-login-form').addEventListener('submit', e => {
   e.preventDefault();
-  const val = idInput.value.trim();
+  const val = idInput.value.trim().toUpperCase();
   const parsed = parseId(val);
   const errBox = document.getElementById('login-error');
   const errText = document.getElementById('login-error-text');
@@ -865,7 +874,8 @@ document.getElementById('staff-login-form').addEventListener('submit', e => {
     return;
   }
 
-  if (parsed.rank === 'A' && !ADMINS[val]) {
+  const adminName = findAdminLabel(val);
+  if (parsed.rank === 'A' && !adminName) {
     errText.textContent = 'ACCESS DENIED: Administrator limit reached.';
     errBox.classList.remove('hidden');
     return;
@@ -873,7 +883,7 @@ document.getElementById('staff-login-form').addEventListener('submit', e => {
 
   currentOperative = parsed;
   document.getElementById('dash-id').textContent = parsed.full;
-  document.getElementById('dash-name').textContent = ADMINS[val] || `Operative (${parsed.rankName})`;
+  document.getElementById('dash-name').textContent = adminName || `Operative (${parsed.rankName})`;
   document.getElementById('dash-decoded').textContent =
     `Rank: ${parsed.rank} (${parsed.rankName}) • Branch: ${parsed.branch} (${parsed.branchName}) • Wing ${parsed.wing}, Flat ${parsed.flat} • UIN ${parsed.uin}`;
 
