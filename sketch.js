@@ -152,30 +152,42 @@ const BRANCH_CARDS = [
 
 const memoryStore = {};
 
+function escapeHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function readStore(key, fallback) {
   try {
     const raw = window.localStorage.getItem(key);
-    if (raw !== null) return JSON.parse(raw);
+    if (raw !== null) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
   } catch (_) {}
 
   if (Object.prototype.hasOwnProperty.call(memoryStore, key)) {
-    return memoryStore[key];
+    return [...memoryStore[key]];
   }
 
   try {
     if (window.name && window.name.startsWith('RDIA_STATE:')) {
       const parsedName = JSON.parse(window.name.slice('RDIA_STATE:'.length));
-      if (parsedName && Object.prototype.hasOwnProperty.call(parsedName, key)) {
+      if (parsedName && Array.isArray(parsedName[key])) {
         return parsedName[key];
       }
     }
   } catch (_) {}
 
-  return [...fallback];
+  return fallback.map(item => ({ ...item }));
 }
 
 function writeStore(key, value) {
-  memoryStore[key] = value;
+  memoryStore[key] = value.map(item => ({ ...item }));
   try {
     window.localStorage.setItem(key, JSON.stringify(value));
   } catch (_) {}
@@ -191,12 +203,12 @@ function writeStore(key, value) {
 }
 
 function formatProjectCode(p) {
-  const ser = String(p.serial || '001').padStart(3, '0');
+  const ser = String(p.serial || '001').replace(/\D/g, '').slice(0, 3).padStart(3, '0');
   return `${p.branch}-${p.typeCode}-${ser}`;
 }
 
 function formatObjectId(o) {
-  const ser = String(o.serial || '001').padStart(3, '0');
+  const ser = String(o.serial || '001').replace(/\D/g, '').slice(0, 3).padStart(3, '0');
   return `OBJ-${ser}`;
 }
 
@@ -487,7 +499,7 @@ app.innerHTML = `
   </main>
 `;
 
-function showScreen(name) {
+window.showScreen = function(name) {
   ['home', 'projects', 'objects', 'portal'].forEach(s => {
     const el = document.getElementById(`screen-${s}`);
     if (el) el.classList.toggle('hidden', s !== name);
@@ -505,13 +517,13 @@ function showScreen(name) {
     renderPortalObjects();
   }
   window.scrollTo({ top: 0, behavior: 'smooth' });
-}
+};
 
 document.getElementById('branches-grid').innerHTML = BRANCH_CARDS.map(b => `
   <button type="button" onclick="showScreen('projects')" class="glass-card rounded-xl p-5 text-left hover:border-cyan-400/60 transition">
     <span class="font-mono text-xs font-bold ${b.colorClass}" style="${b.customStyle}">BRANCH [${b.code}]</span>
-    <h3 class="text-lg font-bold text-white mt-1 mb-2">${b.title}</h3>
-    <p class="text-sm text-slate-400">${b.desc}</p>
+    <h3 class="text-lg font-bold text-white mt-1 mb-2">${escapeHtml(b.title)}</h3>
+    <p class="text-sm text-slate-400">${escapeHtml(b.desc)}</p>
   </button>
 `).join('');
 
@@ -525,11 +537,11 @@ document.getElementById('obj-filters').innerHTML = OBJ_FILTERS.map((f, i) => `
   <button type="button" data-obj="${f}" class="obj-btn font-mono text-[11px] px-2.5 py-1 rounded ${i === 0 ? 'bg-cyan-500 text-slate-950 font-bold' : 'bg-[#06090f] border border-[#1a253a] text-slate-300'}">${f}</button>
 `).join('');
 
-document.getElementById('p-branch').innerHTML = Object.entries(BRANCHES).map(([k, v]) => `<option value="${k}">${k} — ${v}</option>`).join('');
-document.getElementById('p-typecode').innerHTML = Object.entries(PROJECT_TYPES).map(([k, v]) => `<option value="${k}">${k} — ${v}</option>`).join('');
+document.getElementById('p-branch').innerHTML = Object.entries(BRANCHES).map(([k, v]) => `<option value="${k}">${k} — ${escapeHtml(v)}</option>`).join('');
+document.getElementById('p-typecode').innerHTML = Object.entries(PROJECT_TYPES).map(([k, v]) => `<option value="${k}">${k} — ${escapeHtml(v)}</option>`).join('');
 document.getElementById('p-status').innerHTML = PROJECT_STATUSES.map(s => `<option value="${s}">${s}</option>`).join('');
 document.getElementById('o-status').innerHTML = OBJECT_STATUSES.map(s => `<option value="${s}">${s}</option>`).join('');
-document.getElementById('o-itemclass').innerHTML = Object.entries(ITEM_CLASSES).map(([k, v]) => `<option value="${k}">${k} (${v.disruption.split(' // ')[1]} / ${v.risk.split(' // ')[1]})</option>`).join('');
+document.getElementById('o-itemclass').innerHTML = Object.entries(ITEM_CLASSES).map(([k, v]) => `<option value="${k}">${k} (${escapeHtml(v.disruption.split(' // ')[1])} / ${escapeHtml(v.risk.split(' // ')[1])})</option>`).join('');
 
 function renderProjects(filter = 'ALL') {
   activeProjectFilter = filter;
@@ -541,14 +553,14 @@ function renderProjects(filter = 'ALL') {
       <div class="glass-card reveal-card rounded-xl p-6 flex flex-col justify-between">
         <div>
           <div class="flex items-center justify-between gap-2 mb-3">
-            <span class="font-mono text-xs font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 px-2.5 py-0.5 rounded">${code}</span>
-            <span class="font-mono text-[10px] px-2 py-0.5 rounded border ${getStatusBadgeStyle(p.status)}">${p.status}</span>
+            <span class="font-mono text-xs font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 px-2.5 py-0.5 rounded">${escapeHtml(code)}</span>
+            <span class="font-mono text-[10px] px-2 py-0.5 rounded border ${getStatusBadgeStyle(p.status)}">${escapeHtml(p.status)}</span>
           </div>
-          <h3 class="text-xl font-bold text-white">${p.name}</h3>
-          <p class="font-mono text-xs text-slate-400 mt-1 mb-3">${p.domain}</p>
-          <p class="text-sm text-slate-300 leading-relaxed mb-5">${p.desc}</p>
+          <h3 class="text-xl font-bold text-white">${escapeHtml(p.name)}</h3>
+          <p class="font-mono text-xs text-slate-400 mt-1 mb-3">${escapeHtml(p.domain)}</p>
+          <p class="text-sm text-slate-300 leading-relaxed mb-5">${escapeHtml(p.desc)}</p>
         </div>
-        <button type="button" onclick="openProjectDetail('${p.uid}')" class="font-mono text-xs text-cyan-400 hover:underline text-left">OPEN PROJECT BRIEF &rarr;</button>
+        <button type="button" onclick="openProjectDetail('${escapeHtml(p.uid)}')" class="font-mono text-xs text-cyan-400 hover:underline text-left">OPEN PROJECT BRIEF &rarr;</button>
       </div>
     `;
   }).join('');
@@ -569,11 +581,11 @@ window.openProjectDetail = function(uid) {
   const p = projects.find(x => x.uid === uid);
   if (!p) return;
   document.getElementById('project-detail-body').innerHTML = `
-    <div class="font-mono text-xs text-cyan-400 mb-1">${formatProjectCode(p)} • ${p.status}</div>
-    <h3 class="text-2xl font-bold text-white mb-2">${p.name}</h3>
-    <p class="text-xs font-mono text-slate-400 mb-4">BRANCH: ${p.branch} (${BRANCHES[p.branch] || p.branch}) • TYPE: ${p.typeCode} (${PROJECT_TYPES[p.typeCode] || p.typeCode}) • SERIAL: ${p.serial}</p>
-    <p class="text-xs font-mono text-slate-400 mb-4">DOMAIN: ${p.domain}</p>
-    <p class="text-sm text-slate-300 leading-relaxed">${p.desc}</p>
+    <div class="font-mono text-xs text-cyan-400 mb-1">${escapeHtml(formatProjectCode(p))} • ${escapeHtml(p.status)}</div>
+    <h3 class="text-2xl font-bold text-white mb-2">${escapeHtml(p.name)}</h3>
+    <p class="text-xs font-mono text-slate-400 mb-4">BRANCH: ${escapeHtml(p.branch)} (${escapeHtml(BRANCHES[p.branch] || p.branch)}) • TYPE: ${escapeHtml(p.typeCode)} (${escapeHtml(PROJECT_TYPES[p.typeCode] || p.typeCode)}) • SERIAL: ${escapeHtml(p.serial)}</p>
+    <p class="text-xs font-mono text-slate-400 mb-4">DOMAIN: ${escapeHtml(p.domain)}</p>
+    <p class="text-sm text-slate-300 leading-relaxed">${escapeHtml(p.desc)}</p>
   `;
   document.getElementById('project-detail-screen').classList.remove('hidden');
 };
@@ -583,10 +595,10 @@ window.closeProjectDetail = function() {
 };
 
 function canEditAll() {
-  return currentOperative && (currentOperative.rank === 'MX' || currentOperative.rank === 'A');
+  return Boolean(currentOperative && (currentOperative.rank === 'MX' || currentOperative.rank === 'A'));
 }
 
-function toggleCreatePanel(which) {
+window.toggleCreatePanel = function(which) {
   if (!canEditAll()) return;
   document.getElementById('edit-screen').classList.add('hidden');
   const pPanel = document.getElementById('create-project-panel');
@@ -601,7 +613,7 @@ function toggleCreatePanel(which) {
     document.getElementById('o-serial').value = String(researchObjects.length + 1).padStart(3, '0');
     syncObjectPreview();
   }
-}
+};
 
 window.closeEditScreen = function() {
   document.getElementById('edit-screen').classList.add('hidden');
@@ -621,28 +633,28 @@ window.openEditProject = function(uid) {
         <div>
           <label class="block font-mono text-[10px] text-slate-400 mb-1">BRANCH</label>
           <select id="ep-branch" class="w-full font-mono text-xs px-3 py-2 rounded-lg bg-[#06090f] border border-[#1a253a] text-white">
-            ${Object.entries(BRANCHES).map(([k, v]) => `<option value="${k}" ${p.branch === k ? 'selected' : ''}>${k} — ${v}</option>`).join('')}
+            ${Object.entries(BRANCHES).map(([k, v]) => `<option value="${k}" ${p.branch === k ? 'selected' : ''}>${k} — ${escapeHtml(v)}</option>`).join('')}
           </select>
         </div>
         <div>
           <label class="block font-mono text-[10px] text-slate-400 mb-1">TYPE</label>
           <select id="ep-type" class="w-full font-mono text-xs px-3 py-2 rounded-lg bg-[#06090f] border border-[#1a253a] text-white">
-            ${Object.entries(PROJECT_TYPES).map(([k, v]) => `<option value="${k}" ${p.typeCode === k ? 'selected' : ''}>${k} — ${v}</option>`).join('')}
+            ${Object.entries(PROJECT_TYPES).map(([k, v]) => `<option value="${k}" ${p.typeCode === k ? 'selected' : ''}>${k} — ${escapeHtml(v)}</option>`).join('')}
           </select>
         </div>
         <div>
           <label class="block font-mono text-[10px] text-slate-400 mb-1">SERIAL NO.</label>
-          <input id="ep-serial" type="text" maxlength="3" value="${p.serial}" required class="w-full font-mono text-xs px-3 py-2 rounded-lg bg-[#06090f] border border-[#1a253a] text-white" />
+          <input id="ep-serial" type="text" maxlength="3" value="${escapeHtml(p.serial)}" required class="w-full font-mono text-xs px-3 py-2 rounded-lg bg-[#06090f] border border-[#1a253a] text-white" />
         </div>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
           <label class="block font-mono text-[10px] text-slate-400 mb-1">NAME</label>
-          <input id="ep-name" type="text" value="${p.name}" required class="w-full text-xs px-3 py-2 rounded-lg bg-[#06090f] border border-[#1a253a] text-white" />
+          <input id="ep-name" type="text" value="${escapeHtml(p.name)}" required class="w-full text-xs px-3 py-2 rounded-lg bg-[#06090f] border border-[#1a253a] text-white" />
         </div>
         <div>
           <label class="block font-mono text-[10px] text-slate-400 mb-1">DOMAIN</label>
-          <input id="ep-domain" type="text" value="${p.domain}" required class="w-full text-xs px-3 py-2 rounded-lg bg-[#06090f] border border-[#1a253a] text-white" />
+          <input id="ep-domain" type="text" value="${escapeHtml(p.domain)}" required class="w-full text-xs px-3 py-2 rounded-lg bg-[#06090f] border border-[#1a253a] text-white" />
         </div>
         <div>
           <label class="block font-mono text-[10px] text-slate-400 mb-1">STATUS</label>
@@ -653,7 +665,7 @@ window.openEditProject = function(uid) {
       </div>
       <div>
         <label class="block font-mono text-[10px] text-slate-400 mb-1">DESCRIPTION</label>
-        <textarea id="ep-desc" rows="3" required class="w-full text-xs px-3 py-2 rounded-lg bg-[#06090f] border border-[#1a253a] text-white">${p.desc}</textarea>
+        <textarea id="ep-desc" rows="3" required class="w-full text-xs px-3 py-2 rounded-lg bg-[#06090f] border border-[#1a253a] text-white">${escapeHtml(p.desc)}</textarea>
       </div>
       <button type="submit" class="px-5 py-2.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-mono font-bold text-xs uppercase">Save Project Changes</button>
     </form>
@@ -688,11 +700,11 @@ window.openEditObject = function(uid) {
       <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
         <div>
           <label class="block font-mono text-[10px] text-slate-400 mb-1">SERIAL NO.</label>
-          <input id="eo-serial" type="text" maxlength="3" value="${o.serial}" required class="w-full font-mono text-xs px-3 py-2 rounded-lg bg-[#06090f] border border-[#1a253a] text-white" />
+          <input id="eo-serial" type="text" maxlength="3" value="${escapeHtml(o.serial)}" required class="w-full font-mono text-xs px-3 py-2 rounded-lg bg-[#06090f] border border-[#1a253a] text-white" />
         </div>
         <div>
           <label class="block font-mono text-[10px] text-slate-400 mb-1">NAME</label>
-          <input id="eo-name" type="text" value="${o.name}" required class="w-full text-xs px-3 py-2 rounded-lg bg-[#06090f] border border-[#1a253a] text-white" />
+          <input id="eo-name" type="text" value="${escapeHtml(o.name)}" required class="w-full text-xs px-3 py-2 rounded-lg bg-[#06090f] border border-[#1a253a] text-white" />
         </div>
         <div>
           <label class="block font-mono text-[10px] text-slate-400 mb-1">CATEGORY</label>
@@ -712,12 +724,12 @@ window.openEditObject = function(uid) {
       <div>
         <label class="block font-mono text-[10px] text-slate-400 mb-1">CLASS (COUPLED DISRUPTION &amp; RISK)</label>
         <select id="eo-class" class="w-full font-mono text-xs px-3 py-2 rounded-lg bg-[#06090f] border border-[#1a253a] text-white">
-          ${Object.entries(ITEM_CLASSES).map(([k, v]) => `<option value="${k}" ${o.itemClass === k ? 'selected' : ''}>${k} (${v.disruption} / ${v.risk})</option>`).join('')}
+          ${Object.entries(ITEM_CLASSES).map(([k, v]) => `<option value="${k}" ${o.itemClass === k ? 'selected' : ''}>${k} (${escapeHtml(v.disruption)} / ${escapeHtml(v.risk)})</option>`).join('')}
         </select>
       </div>
       <div>
         <label class="block font-mono text-[10px] text-slate-400 mb-1">DESCRIPTION</label>
-        <textarea id="eo-desc" rows="3" required class="w-full text-xs px-3 py-2 rounded-lg bg-[#06090f] border border-[#1a253a] text-white">${o.desc}</textarea>
+        <textarea id="eo-desc" rows="3" required class="w-full text-xs px-3 py-2 rounded-lg bg-[#06090f] border border-[#1a253a] text-white">${escapeHtml(o.desc)}</textarea>
       </div>
       <button type="submit" class="px-5 py-2.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-mono font-bold text-xs uppercase">Save Object Changes</button>
     </form>
@@ -750,14 +762,14 @@ function renderPortalProjects() {
     <div class="p-3.5 rounded-xl bg-[#06090f] border border-[#1a253a] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
         <div class="flex items-center gap-2">
-          <span class="font-mono text-xs font-bold text-cyan-400">${formatProjectCode(p)}</span>
-          <span class="text-sm font-bold text-white">${p.name}</span>
-          <span class="font-mono text-[10px] px-2 py-0.5 rounded border ${getStatusBadgeStyle(p.status)}">${p.status}</span>
+          <span class="font-mono text-xs font-bold text-cyan-400">${escapeHtml(formatProjectCode(p))}</span>
+          <span class="text-sm font-bold text-white">${escapeHtml(p.name)}</span>
+          <span class="font-mono text-[10px] px-2 py-0.5 rounded border ${getStatusBadgeStyle(p.status)}">${escapeHtml(p.status)}</span>
         </div>
-        <p class="font-mono text-[11px] text-slate-400 mt-0.5">${p.domain} • Serial #${p.serial}</p>
+        <p class="font-mono text-[11px] text-slate-400 mt-0.5">${escapeHtml(p.domain)} • Serial #${escapeHtml(p.serial)}</p>
       </div>
       ${editor ? `
-        <button type="button" onclick="openEditProject('${p.uid}')" class="font-mono text-xs px-3 py-1.5 rounded bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold">EDIT PROPERTIES</button>
+        <button type="button" onclick="openEditProject('${escapeHtml(p.uid)}')" class="font-mono text-xs px-3 py-1.5 rounded bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold">EDIT PROPERTIES</button>
       ` : ''}
     </div>
   `).join('');
@@ -775,15 +787,15 @@ function renderPortalObjects() {
       <div class="p-3.5 rounded-xl bg-[#06090f] border border-[#1a253a] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div class="flex flex-wrap items-center gap-2">
-            <span class="font-mono text-xs font-bold text-cyan-400">${formatObjectId(o)}</span>
-            <span class="text-sm font-bold text-white">${o.name}</span>
-            <span class="font-mono text-[9px] font-bold px-2 py-0.5 rounded ${ic.cls}">${o.itemClass}</span>
-            <span class="font-mono text-[10px] px-2 py-0.5 rounded border ${getStatusBadgeStyle(o.status)}">${o.status}</span>
+            <span class="font-mono text-xs font-bold text-cyan-400">${escapeHtml(formatObjectId(o))}</span>
+            <span class="text-sm font-bold text-white">${escapeHtml(o.name)}</span>
+            <span class="font-mono text-[9px] font-bold px-2 py-0.5 rounded ${ic.cls}">${escapeHtml(o.itemClass)}</span>
+            <span class="font-mono text-[10px] px-2 py-0.5 rounded border ${getStatusBadgeStyle(o.status)}">${escapeHtml(o.status)}</span>
           </div>
-          <p class="font-mono text-[11px] text-slate-400 mt-0.5">${o.cat} • ${ic.disruption} • ${ic.risk}</p>
+          <p class="font-mono text-[11px] text-slate-400 mt-0.5">${escapeHtml(o.cat)} • ${escapeHtml(ic.disruption)} • ${escapeHtml(ic.risk)}</p>
         </div>
         ${editor ? `
-          <button type="button" onclick="openEditObject('${o.uid}')" class="font-mono text-xs px-3 py-1.5 rounded bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold">EDIT PROPERTIES</button>
+          <button type="button" onclick="openEditObject('${escapeHtml(o.uid)}')" class="font-mono text-xs px-3 py-1.5 rounded bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold">EDIT PROPERTIES</button>
         ` : ''}
       </div>
     `;
@@ -914,14 +926,14 @@ function renderObjects(cat = 'ALL') {
   document.getElementById('objects-grid').innerHTML = list.map(o => {
     const ic = ITEM_CLASSES[o.itemClass] || ITEM_CLASSES['SAFE'];
     return `
-      <button type="button" onclick="selectObj('${o.uid}')" class="reveal-card text-left p-4 rounded-xl bg-[#06090f] border border-[#1a253a] hover:border-cyan-400/50 transition">
+      <button type="button" onclick="selectObj('${escapeHtml(o.uid)}')" class="reveal-card text-left p-4 rounded-xl bg-[#06090f] border border-[#1a253a] hover:border-cyan-400/50 transition">
         <div class="flex items-center justify-between gap-2">
-          <span class="font-mono text-[10px] text-cyan-400">${formatObjectId(o)} • ${o.cat}</span>
-          <span class="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded ${ic.cls}">${o.itemClass}</span>
+          <span class="font-mono text-[10px] text-cyan-400">${escapeHtml(formatObjectId(o))} • ${escapeHtml(o.cat)}</span>
+          <span class="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded ${ic.cls}">${escapeHtml(o.itemClass)}</span>
         </div>
-        <div class="text-sm font-bold text-white mt-1">${o.name}</div>
-        <div class="font-mono text-[10px] mt-1"><span class="px-1.5 py-0.5 rounded border ${getStatusBadgeStyle(o.status)}">${o.status}</span></div>
-        <div class="font-mono text-[10px] text-slate-400 mt-1.5">${ic.disruption} • ${ic.risk}</div>
+        <div class="text-sm font-bold text-white mt-1">${escapeHtml(o.name)}</div>
+        <div class="font-mono text-[10px] mt-1"><span class="px-1.5 py-0.5 rounded border ${getStatusBadgeStyle(o.status)}">${escapeHtml(o.status)}</span></div>
+        <div class="font-mono text-[10px] text-slate-400 mt-1.5">${escapeHtml(ic.disruption)} • ${escapeHtml(ic.risk)}</div>
       </button>
     `;
   }).join('');
@@ -994,6 +1006,7 @@ document.getElementById('project-form').addEventListener('submit', e => {
   renderPortalProjects();
   toggleCreatePanel(null);
   e.target.reset();
+  syncProjectPreview();
 });
 
 const oSerial = document.getElementById('o-serial');
@@ -1035,15 +1048,18 @@ document.getElementById('object-form').addEventListener('submit', e => {
   renderPortalObjects();
   toggleCreatePanel(null);
   e.target.reset();
+  syncObjectPreview();
 });
 
 const slider = document.getElementById('dist-slider');
 slider.addEventListener('input', () => {
-  const d = slider.value;
+  const d = Number(slider.value);
   document.getElementById('dist-label').textContent = `${d} cm`;
   document.getElementById('lcd-1').textContent = d < 25 ? `DIST: ${d}cm STOP!` : `DIST: ${d}cm  OK`;
   document.getElementById('lcd-2').textContent = 'RIVER: N/A';
 });
 
+syncProjectPreview();
+syncObjectPreview();
 renderProjects('ALL');
 renderObjects('ALL');
