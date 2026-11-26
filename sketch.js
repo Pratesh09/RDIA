@@ -1216,6 +1216,35 @@ slider.addEventListener('input', () => {
   document.getElementById('lcd-2').textContent = 'RIVER: N/A';
 });
 
+document.addEventListener('keydown', (e) => {
+  const tag = e.target && e.target.tagName ? e.target.tagName.toUpperCase() : '';
+  const isFormField = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+
+  if (e.key === 'Escape') {
+    if (typeof window.closeProjectDetail === 'function') window.closeProjectDetail();
+    if (typeof window.closeEditScreen === 'function') window.closeEditScreen();
+    if (typeof window.toggleCreatePanel === 'function') window.toggleCreatePanel(null);
+    if (isFormField && typeof e.target.blur === 'function') e.target.blur();
+    return;
+  }
+
+  if (isFormField) return;
+
+  if (e.altKey && !e.ctrlKey && !e.metaKey) {
+    const screenMap = {
+      '1': 'home',
+      '2': 'projects',
+      '3': 'objects',
+      '4': 'portal'
+    };
+    const targetScreen = screenMap[e.key];
+    if (targetScreen && typeof window.showScreen === 'function') {
+      e.preventDefault();
+      window.showScreen(targetScreen);
+    }
+  }
+});
+
 syncResearchBranchSections();
 syncProjectPreview();
 syncObjectPreview();
