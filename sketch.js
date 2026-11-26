@@ -373,9 +373,9 @@ app.innerHTML = `
         </div>
 
         <div id="objects-restricted-banner" class="hidden glass-card rounded-2xl p-6 border-red-500/40 bg-red-500/5 space-y-2">
-          <div class="font-mono text-xs font-bold text-red-400 uppercase">ACCESS DENIED // RESEARCH ID REQUIRED</div>
-          <p id="objects-restricted-reason" class="text-sm text-slate-300">Only Research [R] operative IDs can access Research Objects (ROBJS). IDs outside Research cannot access objs.</p>
-          <button type="button" onclick="showScreen('portal')" class="mt-2 inline-block font-mono text-xs px-4 py-2 rounded-lg bg-cyan-500 text-slate-950 font-bold">OPEN STAFF PORTAL &rarr;</button>
+          <div class="font-mono text-xs font-bold text-red-400 uppercase">RESTRICTED // RESEARCH BRANCH ONLY</div>
+          <p id="objects-restricted-reason" class="text-sm text-slate-300">Research Objects (ROBJS) are only visible on Research [R] and not on other branches.</p>
+          <button type="button" onclick="openBranchView('R')" class="mt-2 inline-block font-mono text-xs px-4 py-2 rounded-lg bg-cyan-500 text-slate-950 font-bold">VIEW RESEARCH [R] &rarr;</button>
         </div>
 
         <div id="objects-content" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -528,13 +528,29 @@ function isNonResearchOperative() {
 }
 
 function hasResearchAccess() {
-  if (isNonResearchOperative()) return false;
-  if (currentOperative) return currentOperative.branch === 'R';
-  return activeBranchScope === 'R';
+  return Boolean(
+    activeBranchScope === 'R' ||
+    (currentOperative && currentOperative.branch === 'R')
+  );
+}
+
+function canViewObjects() {
+  return Boolean(hasResearchAccess() || currentOperative);
+}
+
+function canAccessProject(project) {
+  if (!project) return false;
+  if (!currentOperative) return true;
+  if (currentOperative.branch === 'R') return true;
+  return project.branch === currentOperative.branch;
 }
 
 function canEditProjects() {
   return Boolean(currentOperative && (currentOperative.rank === 'MX' || currentOperative.rank === 'A'));
+}
+
+function canEditProjectItem(project) {
+  return Boolean(canEditProjects() && canAccessProject(project));
 }
 
 function canEditObjects() {
@@ -542,8 +558,8 @@ function canEditObjects() {
 }
 
 function syncResearchBranchSections() {
-  const showRobjs = hasResearchAccess();
-  const showInlineRobjs = showRobjs && activeBranchScope === 'R';
+  const showInlineRobjs = hasResearchAccess() && activeBranchScope === 'R';
+  const showObjectsView = canViewObjects();
   const inlineBlock = document.getElementById('research-branch-objects-block');
   if (inlineBlock) {
     inlineBlock.classList.toggle('hidden', !showInlineRobjs);
@@ -554,9 +570,7 @@ function syncResearchBranchSections() {
 
   const reasonEl = document.getElementById('objects-restricted-reason');
   if (reasonEl) {
-    reasonEl.textContent = isNonResearchOperative()
-      ? `Operative ID [${currentOperative.full}] is in branch [${currentOperative.branch}]. IDs which aren't Research [R] cannot access Research Objects (objs).`
-      : 'Only Research [R] operative IDs can access Research Objects (ROBJS). IDs outside Research cannot access objs.';
+    reasonEl.textContent = 'Research Objects (ROBJS) are only visible on Research [R] and not on other branches.';
   }
 
   const banner = document.getElementById('objects-restricted-banner');
@@ -565,10 +579,10 @@ function syncResearchBranchSections() {
   const portalObjSection = document.getElementById('portal-objects-section');
   const createObjBtn = document.getElementById('btn-show-create-obj');
 
-  if (banner) banner.classList.toggle('hidden', showRobjs);
-  if (content) content.classList.toggle('hidden', !showRobjs);
-  if (filters) filters.classList.toggle('hidden', !showRobjs);
-  if (portalObjSection) portalObjSection.classList.toggle('hidden', !showRobjs);
+  if (banner) banner.classList.toggle('hidden', showObjectsView);
+  if (content) content.classList.toggle('hidden', !showObjectsView);
+  if (filters) filters.classList.toggle('hidden', !showObjectsView);
+  if (portalObjSection) portalObjSection.classList.toggle('hidden', !showObjectsView);
   if (createObjBtn) createObjBtn.classList.toggle('hidden', !canEditObjects());
 
   if (!canEditObjects()) {
@@ -598,12 +612,12 @@ window.showScreen = function(name) {
     renderProjects(activeProjectFilter);
     observeRevealCards(true, true);
   }
-  if (name === 'objects' && hasResearchAccess()) {
+  if (name === 'objects' && canViewObjects()) {
     renderObjects(activeObjectFilter);
   }
   if (name === 'portal' && currentOperative) {
     renderPortalProjects();
-    if (hasResearchAccess()) {
+    if (canViewObjects()) {
       renderPortalObjects();
     }
   }
@@ -635,10 +649,11 @@ document.getElementById('o-status').innerHTML = OBJECT_STATUSES.map(s => `<optio
 document.getElementById('o-itemclass').innerHTML = Object.entries(ITEM_CLASSES).map(([k, v]) => `<option value="${k}">${k} (${escapeHtml(v.disruption.split(' // ')[1])} / ${escapeHtml(v.risk.split(' // ')[1])})</option>`).join('');
 
 function getScopedProjects() {
+  const authorized = projects.filter(canAccessProject);
   if (activeBranchScope === 'ALL' || activeBranchScope === 'R') {
-    return projects;
+    return authorized;
   }
-  return projects.filter(p => p.branch === activeBranchScope);
+  return authorized.filter(p => p.branch === activeBranchScope);
 }
 
 function renderInlineResearchObjects() {
@@ -668,15 +683,15 @@ function renderProjects(filter = 'ALL') {
 
   if (activeBranchScope === 'R') {
     heading.textContent = 'Research [R] — All Projects & ROBJS';
-    subinfo.textContent = hasResearchAccess()
-      ? 'Research is an exception: showing all projects plus Research Objects below. Scroll down to reveal project cards.'
-      : 'Research [R] project view (ROBJS hidden for non-Research IDs). Scroll down to reveal project cards.';
+    subinfo.textContent = 'Research is an exception: showing all projects plus Research Objects below. Scroll down to reveal project cards.';
   } else if (activeBranchScope !== 'ALL') {
     const bName = BRANCHES[activeBranchScope] || activeBranchScope;
     heading.textContent = `${bName} [${activeBranchScope}] Projects`;
     subinfo.textContent = `Showing only projects marked with branch [${activeBranchScope}]. Scroll down to reveal project cards.`;
   } else {
-    heading.textContent = 'Active RDIA Projects';
+    heading.textContent = isNonResearchOperative()
+      ? `Authorized Projects // Branch [${currentOperative.branch}]`
+      : 'Active RDIA Projects';
     subinfo.textContent = 'Scroll down to reveal project cards.';
   }
 
@@ -687,7 +702,7 @@ function renderProjects(filter = 'ALL') {
   if (!list.length) {
     grid.innerHTML = `
       <div class="glass-card reveal-card rounded-xl p-6 col-span-full text-slate-400 font-mono text-xs">
-        No projects marked [${escapeHtml(activeBranchScope)}]${filter !== 'ALL' ? ` with status ${escapeHtml(filter)}` : ''}.
+        No authorized projects found${activeBranchScope !== 'ALL' ? ` for [${escapeHtml(activeBranchScope)}]` : ''}${filter !== 'ALL' ? ` with status ${escapeHtml(filter)}` : ''}.
       </div>
     `;
     observeRevealCards(true, true);
@@ -728,6 +743,14 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
 window.openProjectDetail = function(uid) {
   const p = projects.find(x => x.uid === uid);
   if (!p) return;
+  if (!canAccessProject(p)) {
+    document.getElementById('project-detail-body').innerHTML = `
+      <div class="font-mono text-xs text-red-400 uppercase mb-1">ACCESS DENIED // BRANCH [${escapeHtml(p.branch)}] ONLY</div>
+      <p class="text-sm text-slate-300">Operative ID [${escapeHtml(currentOperative.full)}] is assigned to branch [${escapeHtml(currentOperative.branch)}] and is not authorized for this project.</p>
+    `;
+    document.getElementById('project-detail-screen').classList.remove('hidden');
+    return;
+  }
   document.getElementById('project-detail-body').innerHTML = `
     <div class="font-mono text-xs text-cyan-400 mb-1">${escapeHtml(formatProjectCode(p))} • ${escapeHtml(p.status)}</div>
     <h3 class="text-2xl font-bold text-white mb-2">${escapeHtml(p.name)}</h3>
@@ -751,6 +774,9 @@ window.toggleCreatePanel = function(which) {
   pPanel.classList.toggle('hidden', which !== 'project');
   oPanel.classList.toggle('hidden', which !== 'object');
   if (which === 'project') {
+    if (isNonResearchOperative()) {
+      document.getElementById('p-branch').value = currentOperative.branch;
+    }
     document.getElementById('p-serial').value = String(projects.length + 1).padStart(3, '0');
     syncProjectPreview();
   }
@@ -766,9 +792,8 @@ window.closeEditScreen = function() {
 };
 
 window.openEditProject = function(uid) {
-  if (!canEditProjects()) return;
   const p = projects.find(x => x.uid === uid);
-  if (!p) return;
+  if (!p || !canEditProjectItem(p)) return;
   document.getElementById('create-project-panel').classList.add('hidden');
   document.getElementById('create-object-panel').classList.add('hidden');
   document.getElementById('edit-screen-title').textContent = `EDIT PROJECT // ${formatProjectCode(p)}`;
@@ -819,6 +844,7 @@ window.openEditProject = function(uid) {
 
   document.getElementById('edit-project-form').addEventListener('submit', ev => {
     ev.preventDefault();
+    if (!canEditProjectItem(p)) return;
     p.branch = document.getElementById('ep-branch').value;
     p.typeCode = document.getElementById('ep-type').value;
     p.serial = (document.getElementById('ep-serial').value.replace(/\D/g, '').slice(0, 3) || '001').padStart(3, '0');
@@ -900,12 +926,29 @@ window.openEditObject = function(uid) {
 };
 
 function renderPortalProjects() {
+  const authorizedProjects = projects.filter(canAccessProject);
   const editor = canEditProjects();
-  document.getElementById('proj-perm-badge').textContent = editor
-    ? `FULL EDIT ACCESS (${currentOperative.rank})`
-    : 'VIEW ONLY (MX & A CAN EDIT)';
 
-  document.getElementById('portal-projects-list').innerHTML = projects.map(p => `
+  if (currentOperative && currentOperative.branch !== 'R') {
+    document.getElementById('proj-perm-badge').textContent = editor
+      ? `BRANCH [${currentOperative.branch}] EDIT ONLY (${currentOperative.rank})`
+      : `BRANCH [${currentOperative.branch}] VIEW ONLY`;
+  } else {
+    document.getElementById('proj-perm-badge').textContent = editor
+      ? `FULL EDIT ACCESS (${currentOperative ? currentOperative.rank : 'GUEST'})`
+      : 'VIEW ONLY (MX & A CAN EDIT)';
+  }
+
+  if (!authorizedProjects.length) {
+    document.getElementById('portal-projects-list').innerHTML = `
+      <div class="p-4 rounded-xl bg-[#06090f] border border-[#1a253a] font-mono text-xs text-slate-400">
+        No projects authorized for branch [${escapeHtml(currentOperative ? currentOperative.branch : 'NONE')}]. Non-Research IDs cannot access projects outside their branch.
+      </div>
+    `;
+    return;
+  }
+
+  document.getElementById('portal-projects-list').innerHTML = authorizedProjects.map(p => `
     <div class="p-3.5 rounded-xl bg-[#06090f] border border-[#1a253a] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
         <div class="flex items-center gap-2">
@@ -913,9 +956,9 @@ function renderPortalProjects() {
           <span class="text-sm font-bold text-white">${escapeHtml(p.name)}</span>
           <span class="font-mono text-[10px] px-2 py-0.5 rounded border ${getStatusBadgeStyle(p.status)}">${escapeHtml(p.status)}</span>
         </div>
-        <p class="font-mono text-[11px] text-slate-400 mt-0.5">${escapeHtml(p.domain)} • Serial #${escapeHtml(p.serial)}</p>
+        <p class="font-mono text-[11px] text-slate-400 mt-0.5">${escapeHtml(p.domain)} • Branch [${escapeHtml(p.branch)}] • Serial #${escapeHtml(p.serial)}</p>
       </div>
-      ${editor ? `
+      ${canEditProjectItem(p) ? `
         <button type="button" onclick="openEditProject('${escapeHtml(p.uid)}')" class="font-mono text-xs px-3 py-1.5 rounded bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold">EDIT PROPERTIES</button>
       ` : ''}
     </div>
@@ -923,14 +966,14 @@ function renderPortalProjects() {
 }
 
 function renderPortalObjects() {
-  if (!hasResearchAccess()) {
+  if (!canViewObjects()) {
     document.getElementById('portal-objects-list').innerHTML = '';
     return;
   }
   const editor = canEditObjects();
   document.getElementById('obj-perm-badge').textContent = editor
     ? `RESEARCH EDIT ACCESS (${currentOperative.rank})`
-    : 'RESEARCH VIEW ONLY';
+    : 'VIEW ONLY (RESEARCH R ONLY TO EDIT)';
 
   document.getElementById('portal-objects-list').innerHTML = researchObjects.map(o => {
     const ic = ITEM_CLASSES[o.itemClass] || ITEM_CLASSES['SAFE'];
@@ -1045,6 +1088,9 @@ document.getElementById('staff-login-form').addEventListener('submit', e => {
   }
 
   currentOperative = parsed;
+  if (isNonResearchOperative()) {
+    activeBranchScope = parsed.branch;
+  }
   document.getElementById('dash-id').textContent = parsed.full;
   document.getElementById('dash-name').textContent = adminName || `Operative (${parsed.rankName})`;
   document.getElementById('dash-decoded').textContent =
@@ -1056,15 +1102,18 @@ document.getElementById('staff-login-form').addEventListener('submit', e => {
   document.getElementById('portal-login-view').classList.add('hidden');
   document.getElementById('portal-dashboard-view').classList.remove('hidden');
   document.getElementById('nav-badge').textContent = `${parsed.rank}-${parsed.branch}-${parsed.flat}`;
+  renderProjects(activeProjectFilter);
   renderPortalProjects();
   renderPortalObjects();
 });
 
 document.getElementById('logout-btn').addEventListener('click', () => {
   currentOperative = null;
+  activeBranchScope = 'ALL';
   closeEditScreen();
   toggleCreatePanel(null);
   syncResearchBranchSections();
+  renderProjects(activeProjectFilter);
   document.getElementById('portal-dashboard-view').classList.add('hidden');
   document.getElementById('portal-login-view').classList.remove('hidden');
   idInput.value = '';
@@ -1072,7 +1121,7 @@ document.getElementById('logout-btn').addEventListener('click', () => {
 });
 
 function renderObjects(cat = 'ALL') {
-  if (!hasResearchAccess()) {
+  if (!canViewObjects()) {
     syncResearchBranchSections();
     return;
   }
@@ -1099,7 +1148,7 @@ function renderObjects(cat = 'ALL') {
 }
 
 window.selectObj = function(uid) {
-  if (!hasResearchAccess()) return;
+  if (!canViewObjects()) return;
   const o = researchObjects.find(x => x.uid === uid);
   if (!o) return;
   selectedObjectUid = uid;
@@ -1119,7 +1168,7 @@ window.selectObj = function(uid) {
 
 document.querySelectorAll('.obj-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    if (!hasResearchAccess()) return;
+    if (!canViewObjects()) return;
     document.querySelectorAll('.obj-btn').forEach(b => {
       b.className = 'obj-btn font-mono text-[11px] px-2.5 py-1 rounded bg-[#06090f] border border-[#1a253a] text-slate-300';
     });
@@ -1147,9 +1196,10 @@ document.getElementById('project-form').addEventListener('submit', e => {
   e.preventDefault();
   if (!canEditProjects()) return;
   const ser = (pSerial.value.replace(/\D/g, '').slice(0, 3) || '005').padStart(3, '0');
+  const chosenBranch = isNonResearchOperative() ? currentOperative.branch : pBranch.value;
   projects.unshift({
     uid: `proj-${Date.now()}`,
-    branch: pBranch.value,
+    branch: chosenBranch,
     typeCode: pType.value,
     serial: ser,
     name: document.getElementById('p-name').value.trim(),
