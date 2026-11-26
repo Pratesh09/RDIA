@@ -83,7 +83,7 @@ const INITIAL_PROJECTS = [
   },
   {
     uid: 'proj-3',
-    branch: 'R',
+    branch: 'W',
     typeCode: 'XU',
     serial: '003',
     name: 'Pneumatic Glider Launcher',
@@ -143,12 +143,12 @@ const INITIAL_OBJECTS = [
 ];
 
 const BRANCH_CARDS = [
-  { code: 'R', colorClass: 'text-cyan-400', customStyle: '', title: 'Research', desc: 'Experimental discovery, telemetry research, and classified Research Objects.' },
-  { code: 'D', colorClass: 'text-emerald-400', customStyle: '', title: 'Development', desc: 'Building prototypes, circuits, rovers, gliders, and practical society tools.' },
-  { code: 'I', colorClass: 'text-indigo-400', customStyle: '', title: 'Intelligence (incl. Defence)', desc: 'Unified intelligence and defence covering safety, monitoring, and situational awareness.' },
-  { code: 'L', colorClass: 'text-pink-400', customStyle: '', title: 'Logistics', desc: 'Materials, parts, field readiness, and deployment coordination.' },
-  { code: 'C', colorClass: 'text-amber-400', customStyle: '', title: 'Cultural Committee', desc: 'Society events, exhibitions, and community engagement across Wings A–F.' },
-  { code: 'W', colorClass: '', customStyle: 'color: #c4b5fd;', title: 'Welfare', desc: 'Resident welfare, sustainable society upgrades, and community support.' }
+  { code: 'R', colorClass: 'text-cyan-400', customStyle: '', title: 'Research', desc: 'Experimental discovery, telemetry research, all projects, and Research Objects.' },
+  { code: 'D', colorClass: 'text-emerald-400', customStyle: '', title: 'Development', desc: 'Prototypes, circuits, rovers, gliders, and practical society tools marked [D].' },
+  { code: 'I', colorClass: 'text-indigo-400', customStyle: '', title: 'Intelligence (incl. Defence)', desc: 'Unified intelligence and defence covering safety, monitoring, and situational awareness marked [I].' },
+  { code: 'L', colorClass: 'text-pink-400', customStyle: '', title: 'Logistics', desc: 'Materials, parts, field readiness, and deployment coordination marked [L].' },
+  { code: 'C', colorClass: 'text-amber-400', customStyle: '', title: 'Cultural Committee', desc: 'Society events, exhibitions, and community engagement across Wings A–F marked [C].' },
+  { code: 'W', colorClass: '', customStyle: 'color: #c4b5fd;', title: 'Welfare', desc: 'Resident welfare, sustainable society upgrades, and community support marked [W].' }
 ];
 
 const memoryStore = {};
@@ -232,44 +232,49 @@ function getStatusBadgeStyle(status) {
 const cardObserver = new IntersectionObserver(
   (entries) => {
     entries.forEach((entry) => {
-      if (entry.isIntersecting || entry.boundingClientRect.top < window.innerHeight) {
+      if (entry.isIntersecting) {
         entry.target.classList.add('is-visible');
         cardObserver.unobserve(entry.target);
       }
     });
   },
-  { threshold: 0.05, rootMargin: '0px 0px 40px 0px' }
+  { threshold: 0.12, rootMargin: '0px 0px -30px 0px' }
 );
 
-function checkVisibleOnScroll() {
+function observeRevealCards(resetVisibility = false, onlyWhenScrolled = false) {
+  const hasScrolled = window.scrollY > 12;
+  document.querySelectorAll('.reveal-card').forEach((el, idx) => {
+    if (resetVisibility) {
+      el.classList.remove('is-visible');
+    }
+    el.style.transitionDelay = `${Math.min(idx * 70, 240)}ms`;
+    cardObserver.unobserve(el);
+    if (!onlyWhenScrolled || hasScrolled) {
+      cardObserver.observe(el);
+    }
+  });
+}
+
+function handleScrollReveal() {
+  if (window.scrollY <= 12) return;
   document.querySelectorAll('.reveal-card:not(.is-visible)').forEach((el) => {
+    cardObserver.observe(el);
     const rect = el.getBoundingClientRect();
-    if (rect.top < window.innerHeight * 0.92 && rect.bottom > 0) {
+    if (rect.top < window.innerHeight * 0.88 && rect.bottom > 0) {
       el.classList.add('is-visible');
       cardObserver.unobserve(el);
     }
   });
 }
 
-function observeRevealCards(resetVisibility = false) {
-  document.querySelectorAll('.reveal-card').forEach((el, idx) => {
-    if (resetVisibility) {
-      el.classList.remove('is-visible');
-    }
-    el.style.transitionDelay = `${Math.min(idx * 60, 240)}ms`;
-    cardObserver.unobserve(el);
-    cardObserver.observe(el);
-  });
-  requestAnimationFrame(() => checkVisibleOnScroll());
-}
-
-window.addEventListener('scroll', checkVisibleOnScroll, { passive: true });
-window.addEventListener('resize', checkVisibleOnScroll, { passive: true });
+window.addEventListener('scroll', handleScrollReveal, { passive: true });
+window.addEventListener('resize', handleScrollReveal, { passive: true });
 
 let projects = readStore('rdia_projects_v8', INITIAL_PROJECTS);
 let researchObjects = readStore('rdia_objects_v8', INITIAL_OBJECTS);
 let currentOperative = null;
 let activeProjectFilter = 'ALL';
+let activeBranchScope = 'ALL';
 let activeObjectFilter = 'ALL';
 let selectedObjectUid = researchObjects[0] ? researchObjects[0].uid : null;
 
@@ -311,7 +316,7 @@ app.innerHTML = `
             "RDIA is an organization for the welfare of apartment complex Shri Krishna Heights, Hendrepada badlapur 421503 we help prduce projects and discover new things this innovation helps us to progress in the development of society"
           </p>
           <div class="flex flex-wrap gap-4">
-            <button type="button" onclick="showScreen('projects')" class="px-5 py-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold text-sm transition">Projects</button>
+            <button type="button" onclick="activeBranchScope = 'ALL'; showScreen('projects')" class="px-5 py-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold text-sm transition">Projects</button>
           </div>
         </div>
 
@@ -324,16 +329,28 @@ app.innerHTML = `
     </section>
 
     <section id="screen-projects" class="hidden py-14 sm:py-20">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#1a253a] pb-6">
           <div>
             <p class="font-mono text-xs text-emerald-400 uppercase tracking-widest mb-1">// PROJECTS SCREEN</p>
-            <h2 class="text-3xl font-bold text-white">Active RDIA Projects</h2>
+            <h2 id="projects-heading" class="text-3xl font-bold text-white">Active RDIA Projects</h2>
+            <p id="projects-subinfo" class="font-mono text-[11px] text-slate-400 mt-1">Scroll down to reveal project cards.</p>
           </div>
           <div class="flex flex-wrap gap-2" id="project-filters"></div>
         </div>
 
-        <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+        <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6 min-h-[110vh]"></div>
+
+        <div id="research-branch-objects-block" class="hidden glass-card rounded-2xl p-6 sm:p-8 border-cyan-500/40 space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1a253a] pb-4">
+            <div>
+              <p class="font-mono text-xs text-cyan-400 uppercase tracking-widest">// RESEARCH [R] EXCLUSIVE REGISTRY</p>
+              <h3 class="text-2xl font-bold text-white mt-1">Research Objects (ROBJS)</h3>
+            </div>
+            <button type="button" onclick="showScreen('objects')" class="font-mono text-xs px-3.5 py-2 rounded-lg bg-cyan-500/15 border border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/25">OPEN FULL INSPECTOR &rarr;</button>
+          </div>
+          <div id="research-inline-objects-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+        </div>
 
         <div id="project-detail-screen" class="hidden glass-card rounded-2xl p-6 sm:p-8 space-y-4">
           <div class="flex items-center justify-between border-b border-[#1a253a] pb-3">
@@ -355,7 +372,13 @@ app.innerHTML = `
           <div class="flex flex-wrap gap-2" id="obj-filters"></div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div id="objects-restricted-banner" class="hidden glass-card rounded-2xl p-6 border-red-500/40 bg-red-500/5 space-y-2">
+          <div class="font-mono text-xs font-bold text-red-400 uppercase">ACCESS DENIED // RESEARCH ID REQUIRED</div>
+          <p id="objects-restricted-reason" class="text-sm text-slate-300">Only Research [R] operative IDs can access Research Objects (ROBJS). IDs outside Research cannot access objs.</p>
+          <button type="button" onclick="showScreen('portal')" class="mt-2 inline-block font-mono text-xs px-4 py-2 rounded-lg bg-cyan-500 text-slate-950 font-bold">OPEN STAFF PORTAL &rarr;</button>
+        </div>
+
+        <div id="objects-content" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div id="objects-grid" class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
           <div class="glass-card rounded-2xl p-5 space-y-3 h-fit">
             <div class="flex items-center justify-between">
@@ -477,7 +500,7 @@ app.innerHTML = `
             <div id="portal-projects-list" class="space-y-3"></div>
           </div>
 
-          <div class="glass-card rounded-2xl p-6">
+          <div id="portal-objects-section" class="glass-card rounded-2xl p-6">
             <div class="flex items-center justify-between gap-3 mb-4">
               <h4 class="font-mono text-xs font-bold text-cyan-400 uppercase">// RESEARCH OBJECTS REGISTRY &amp; EDITOR</h4>
               <span id="obj-perm-badge" class="font-mono text-[10px] text-slate-400"></span>
@@ -500,28 +523,95 @@ app.innerHTML = `
   </main>
 `;
 
+function isNonResearchOperative() {
+  return Boolean(currentOperative && currentOperative.branch !== 'R');
+}
+
+function hasResearchAccess() {
+  if (isNonResearchOperative()) return false;
+  if (currentOperative) return currentOperative.branch === 'R';
+  return activeBranchScope === 'R';
+}
+
+function canEditProjects() {
+  return Boolean(currentOperative && (currentOperative.rank === 'MX' || currentOperative.rank === 'A'));
+}
+
+function canEditObjects() {
+  return Boolean(currentOperative && currentOperative.branch === 'R' && (currentOperative.rank === 'MX' || currentOperative.rank === 'A'));
+}
+
+function syncResearchBranchSections() {
+  const showRobjs = hasResearchAccess();
+  const showInlineRobjs = showRobjs && activeBranchScope === 'R';
+  const inlineBlock = document.getElementById('research-branch-objects-block');
+  if (inlineBlock) {
+    inlineBlock.classList.toggle('hidden', !showInlineRobjs);
+    if (showInlineRobjs) {
+      renderInlineResearchObjects();
+    }
+  }
+
+  const reasonEl = document.getElementById('objects-restricted-reason');
+  if (reasonEl) {
+    reasonEl.textContent = isNonResearchOperative()
+      ? `Operative ID [${currentOperative.full}] is in branch [${currentOperative.branch}]. IDs which aren't Research [R] cannot access Research Objects (objs).`
+      : 'Only Research [R] operative IDs can access Research Objects (ROBJS). IDs outside Research cannot access objs.';
+  }
+
+  const banner = document.getElementById('objects-restricted-banner');
+  const content = document.getElementById('objects-content');
+  const filters = document.getElementById('obj-filters');
+  const portalObjSection = document.getElementById('portal-objects-section');
+  const createObjBtn = document.getElementById('btn-show-create-obj');
+
+  if (banner) banner.classList.toggle('hidden', showRobjs);
+  if (content) content.classList.toggle('hidden', !showRobjs);
+  if (filters) filters.classList.toggle('hidden', !showRobjs);
+  if (portalObjSection) portalObjSection.classList.toggle('hidden', !showRobjs);
+  if (createObjBtn) createObjBtn.classList.toggle('hidden', !canEditObjects());
+
+  if (!canEditObjects()) {
+    document.getElementById('create-object-panel').classList.add('hidden');
+  }
+}
+
+window.openBranchView = function(branchCode) {
+  activeBranchScope = branchCode;
+  activeProjectFilter = 'ALL';
+  document.querySelectorAll('.filter-btn').forEach((b, idx) => {
+    b.className = idx === 0
+      ? 'filter-btn font-mono text-xs px-3 py-2 rounded-lg bg-cyan-500 text-slate-950 font-bold'
+      : 'filter-btn font-mono text-xs px-3 py-2 rounded-lg bg-[#0c121e] border border-[#1a253a] text-slate-300';
+  });
+  showScreen('projects');
+};
+
 window.showScreen = function(name) {
   ['home', 'projects', 'objects', 'portal'].forEach(s => {
     const el = document.getElementById(`screen-${s}`);
     if (el) el.classList.toggle('hidden', s !== name);
   });
+  syncResearchBranchSections();
+
   if (name === 'projects') {
     renderProjects(activeProjectFilter);
-    observeRevealCards(true);
+    observeRevealCards(true, true);
   }
-  if (name === 'objects') {
+  if (name === 'objects' && hasResearchAccess()) {
     renderObjects(activeObjectFilter);
-    observeRevealCards(true);
   }
   if (name === 'portal' && currentOperative) {
     renderPortalProjects();
-    renderPortalObjects();
+    if (hasResearchAccess()) {
+      renderPortalObjects();
+    }
   }
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({ top: 0, behavior: 'auto' });
 };
 
 document.getElementById('branches-grid').innerHTML = BRANCH_CARDS.map(b => `
-  <button type="button" onclick="showScreen('projects')" class="glass-card rounded-xl p-5 text-left hover:border-cyan-400/60 transition">
+  <button type="button" onclick="openBranchView('${escapeHtml(b.code)}')" class="glass-card rounded-xl p-5 text-left hover:border-cyan-400/60 transition">
     <span class="font-mono text-xs font-bold ${b.colorClass}" style="${b.customStyle}">BRANCH [${b.code}]</span>
     <h3 class="text-lg font-bold text-white mt-1 mb-2">${escapeHtml(b.title)}</h3>
     <p class="text-sm text-slate-400">${escapeHtml(b.desc)}</p>
@@ -544,28 +634,85 @@ document.getElementById('p-status').innerHTML = PROJECT_STATUSES.map(s => `<opti
 document.getElementById('o-status').innerHTML = OBJECT_STATUSES.map(s => `<option value="${s}">${s}</option>`).join('');
 document.getElementById('o-itemclass').innerHTML = Object.entries(ITEM_CLASSES).map(([k, v]) => `<option value="${k}">${k} (${escapeHtml(v.disruption.split(' // ')[1])} / ${escapeHtml(v.risk.split(' // ')[1])})</option>`).join('');
 
+function getScopedProjects() {
+  if (activeBranchScope === 'ALL' || activeBranchScope === 'R') {
+    return projects;
+  }
+  return projects.filter(p => p.branch === activeBranchScope);
+}
+
+function renderInlineResearchObjects() {
+  if (!hasResearchAccess()) return;
+  const grid = document.getElementById('research-inline-objects-grid');
+  if (!grid) return;
+  grid.innerHTML = researchObjects.map(o => {
+    const ic = ITEM_CLASSES[o.itemClass] || ITEM_CLASSES['SAFE'];
+    return `
+      <div class="p-4 rounded-xl bg-[#06090f] border border-[#1a253a] space-y-1.5">
+        <div class="flex items-center justify-between gap-2">
+          <span class="font-mono text-[10px] text-cyan-400">${escapeHtml(formatObjectId(o))} • ${escapeHtml(o.cat)}</span>
+          <span class="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded ${ic.cls}">${escapeHtml(o.itemClass)}</span>
+        </div>
+        <div class="text-sm font-bold text-white">${escapeHtml(o.name)}</div>
+        <div class="font-mono text-[10px]"><span class="px-1.5 py-0.5 rounded border ${getStatusBadgeStyle(o.status)}">${escapeHtml(o.status)}</span></div>
+        <p class="text-xs text-slate-300 leading-relaxed pt-1">${escapeHtml(o.desc)}</p>
+      </div>
+    `;
+  }).join('');
+}
+
 function renderProjects(filter = 'ALL') {
   activeProjectFilter = filter;
+  const heading = document.getElementById('projects-heading');
+  const subinfo = document.getElementById('projects-subinfo');
+
+  if (activeBranchScope === 'R') {
+    heading.textContent = 'Research [R] — All Projects & ROBJS';
+    subinfo.textContent = hasResearchAccess()
+      ? 'Research is an exception: showing all projects plus Research Objects below. Scroll down to reveal project cards.'
+      : 'Research [R] project view (ROBJS hidden for non-Research IDs). Scroll down to reveal project cards.';
+  } else if (activeBranchScope !== 'ALL') {
+    const bName = BRANCHES[activeBranchScope] || activeBranchScope;
+    heading.textContent = `${bName} [${activeBranchScope}] Projects`;
+    subinfo.textContent = `Showing only projects marked with branch [${activeBranchScope}]. Scroll down to reveal project cards.`;
+  } else {
+    heading.textContent = 'Active RDIA Projects';
+    subinfo.textContent = 'Scroll down to reveal project cards.';
+  }
+
+  const scoped = getScopedProjects();
+  const list = filter === 'ALL' ? scoped : scoped.filter(p => p.status === filter);
   const grid = document.getElementById('projects-grid');
-  const list = filter === 'ALL' ? projects : projects.filter(p => p.status === filter);
-  grid.innerHTML = list.map(p => {
+
+  if (!list.length) {
+    grid.innerHTML = `
+      <div class="glass-card reveal-card rounded-xl p-6 col-span-full text-slate-400 font-mono text-xs">
+        No projects marked [${escapeHtml(activeBranchScope)}]${filter !== 'ALL' ? ` with status ${escapeHtml(filter)}` : ''}.
+      </div>
+    `;
+    observeRevealCards(true, true);
+    return;
+  }
+
+  grid.innerHTML = list.map((p, idx) => {
     const code = formatProjectCode(p);
+    const staggerClass = idx % 2 === 1 ? 'mt-8 sm:mt-12' : '';
     return `
-      <div class="glass-card reveal-card rounded-xl p-6 flex flex-col justify-between">
+      <div class="glass-card reveal-card ${staggerClass} rounded-xl p-6 flex flex-col justify-between">
         <div>
           <div class="flex items-center justify-between gap-2 mb-3">
             <span class="font-mono text-xs font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 px-2.5 py-0.5 rounded">${escapeHtml(code)}</span>
             <span class="font-mono text-[10px] px-2 py-0.5 rounded border ${getStatusBadgeStyle(p.status)}">${escapeHtml(p.status)}</span>
           </div>
           <h3 class="text-xl font-bold text-white">${escapeHtml(p.name)}</h3>
-          <p class="font-mono text-xs text-slate-400 mt-1 mb-3">${escapeHtml(p.domain)}</p>
+          <p class="font-mono text-xs text-slate-400 mt-1 mb-3">${escapeHtml(p.domain)} • Branch [${escapeHtml(p.branch)}]</p>
           <p class="text-sm text-slate-300 leading-relaxed mb-5">${escapeHtml(p.desc)}</p>
         </div>
         <button type="button" onclick="openProjectDetail('${escapeHtml(p.uid)}')" class="font-mono text-xs text-cyan-400 hover:underline text-left">OPEN PROJECT BRIEF &rarr;</button>
       </div>
     `;
   }).join('');
-  observeRevealCards(true);
+  observeRevealCards(true, true);
 }
 
 document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -595,12 +742,9 @@ window.closeProjectDetail = function() {
   document.getElementById('project-detail-screen').classList.add('hidden');
 };
 
-function canEditAll() {
-  return Boolean(currentOperative && (currentOperative.rank === 'MX' || currentOperative.rank === 'A'));
-}
-
 window.toggleCreatePanel = function(which) {
-  if (!canEditAll()) return;
+  if (which === 'project' && !canEditProjects()) return;
+  if (which === 'object' && !canEditObjects()) return;
   document.getElementById('edit-screen').classList.add('hidden');
   const pPanel = document.getElementById('create-project-panel');
   const oPanel = document.getElementById('create-object-panel');
@@ -622,7 +766,7 @@ window.closeEditScreen = function() {
 };
 
 window.openEditProject = function(uid) {
-  if (!canEditAll()) return;
+  if (!canEditProjects()) return;
   const p = projects.find(x => x.uid === uid);
   if (!p) return;
   document.getElementById('create-project-panel').classList.add('hidden');
@@ -690,7 +834,7 @@ window.openEditProject = function(uid) {
 };
 
 window.openEditObject = function(uid) {
-  if (!canEditAll()) return;
+  if (!canEditObjects()) return;
   const o = researchObjects.find(x => x.uid === uid);
   if (!o) return;
   document.getElementById('create-project-panel').classList.add('hidden');
@@ -739,6 +883,7 @@ window.openEditObject = function(uid) {
 
   document.getElementById('edit-object-form').addEventListener('submit', ev => {
     ev.preventDefault();
+    if (!canEditObjects()) return;
     o.serial = (document.getElementById('eo-serial').value.replace(/\D/g, '').slice(0, 3) || '001').padStart(3, '0');
     o.name = document.getElementById('eo-name').value.trim();
     o.cat = document.getElementById('eo-cat').value;
@@ -748,13 +893,14 @@ window.openEditObject = function(uid) {
     selectedObjectUid = o.uid;
     writeStore('rdia_objects_v8', researchObjects);
     renderObjects(activeObjectFilter);
+    renderInlineResearchObjects();
     renderPortalObjects();
     closeEditScreen();
   });
 };
 
 function renderPortalProjects() {
-  const editor = canEditAll();
+  const editor = canEditProjects();
   document.getElementById('proj-perm-badge').textContent = editor
     ? `FULL EDIT ACCESS (${currentOperative.rank})`
     : 'VIEW ONLY (MX & A CAN EDIT)';
@@ -777,10 +923,14 @@ function renderPortalProjects() {
 }
 
 function renderPortalObjects() {
-  const editor = canEditAll();
+  if (!hasResearchAccess()) {
+    document.getElementById('portal-objects-list').innerHTML = '';
+    return;
+  }
+  const editor = canEditObjects();
   document.getElementById('obj-perm-badge').textContent = editor
-    ? `FULL EDIT ACCESS (${currentOperative.rank})`
-    : 'VIEW ONLY (MX & A CAN EDIT)';
+    ? `RESEARCH EDIT ACCESS (${currentOperative.rank})`
+    : 'RESEARCH VIEW ONLY';
 
   document.getElementById('portal-objects-list').innerHTML = researchObjects.map(o => {
     const ic = ITEM_CLASSES[o.itemClass] || ITEM_CLASSES['SAFE'];
@@ -900,9 +1050,8 @@ document.getElementById('staff-login-form').addEventListener('submit', e => {
   document.getElementById('dash-decoded').textContent =
     `Rank: ${parsed.rank} (${parsed.rankName}) • Branch: ${parsed.branch} (${parsed.branchName}) • Wing ${parsed.wing}, Flat ${parsed.flat} • UIN ${parsed.uin}`;
 
-  const showCreate = canEditAll();
-  document.getElementById('btn-show-create-proj').classList.toggle('hidden', !showCreate);
-  document.getElementById('btn-show-create-obj').classList.toggle('hidden', !showCreate);
+  document.getElementById('btn-show-create-proj').classList.toggle('hidden', !canEditProjects());
+  syncResearchBranchSections();
 
   document.getElementById('portal-login-view').classList.add('hidden');
   document.getElementById('portal-dashboard-view').classList.remove('hidden');
@@ -915,6 +1064,7 @@ document.getElementById('logout-btn').addEventListener('click', () => {
   currentOperative = null;
   closeEditScreen();
   toggleCreatePanel(null);
+  syncResearchBranchSections();
   document.getElementById('portal-dashboard-view').classList.add('hidden');
   document.getElementById('portal-login-view').classList.remove('hidden');
   idInput.value = '';
@@ -922,12 +1072,16 @@ document.getElementById('logout-btn').addEventListener('click', () => {
 });
 
 function renderObjects(cat = 'ALL') {
+  if (!hasResearchAccess()) {
+    syncResearchBranchSections();
+    return;
+  }
   activeObjectFilter = cat;
   const list = cat === 'ALL' ? researchObjects : researchObjects.filter(o => o.cat === cat);
   document.getElementById('objects-grid').innerHTML = list.map(o => {
     const ic = ITEM_CLASSES[o.itemClass] || ITEM_CLASSES['SAFE'];
     return `
-      <button type="button" onclick="selectObj('${escapeHtml(o.uid)}')" class="reveal-card text-left p-4 rounded-xl bg-[#06090f] border border-[#1a253a] hover:border-cyan-400/50 transition">
+      <button type="button" onclick="selectObj('${escapeHtml(o.uid)}')" class="reveal-card is-visible text-left p-4 rounded-xl bg-[#06090f] border border-[#1a253a] hover:border-cyan-400/50 transition">
         <div class="flex items-center justify-between gap-2">
           <span class="font-mono text-[10px] text-cyan-400">${escapeHtml(formatObjectId(o))} • ${escapeHtml(o.cat)}</span>
           <span class="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded ${ic.cls}">${escapeHtml(o.itemClass)}</span>
@@ -942,10 +1096,10 @@ function renderObjects(cat = 'ALL') {
     const match = list.find(x => x.uid === selectedObjectUid) || list[0];
     selectObj(match.uid);
   }
-  observeRevealCards(true);
 }
 
 window.selectObj = function(uid) {
+  if (!hasResearchAccess()) return;
   const o = researchObjects.find(x => x.uid === uid);
   if (!o) return;
   selectedObjectUid = uid;
@@ -965,6 +1119,7 @@ window.selectObj = function(uid) {
 
 document.querySelectorAll('.obj-btn').forEach(btn => {
   btn.addEventListener('click', () => {
+    if (!hasResearchAccess()) return;
     document.querySelectorAll('.obj-btn').forEach(b => {
       b.className = 'obj-btn font-mono text-[11px] px-2.5 py-1 rounded bg-[#06090f] border border-[#1a253a] text-slate-300';
     });
@@ -990,7 +1145,7 @@ function syncProjectPreview() {
 
 document.getElementById('project-form').addEventListener('submit', e => {
   e.preventDefault();
-  if (!canEditAll()) return;
+  if (!canEditProjects()) return;
   const ser = (pSerial.value.replace(/\D/g, '').slice(0, 3) || '005').padStart(3, '0');
   projects.unshift({
     uid: `proj-${Date.now()}`,
@@ -1031,7 +1186,7 @@ function syncObjectPreview() {
 
 document.getElementById('object-form').addEventListener('submit', e => {
   e.preventDefault();
-  if (!canEditAll()) return;
+  if (!canEditObjects()) return;
   const ser = (oSerial.value.replace(/\D/g, '').slice(0, 3) || String(researchObjects.length + 1).padStart(3, '0')).padStart(3, '0');
   const newObj = {
     uid: `obj-${Date.now()}`,
@@ -1046,6 +1201,7 @@ document.getElementById('object-form').addEventListener('submit', e => {
   selectedObjectUid = newObj.uid;
   writeStore('rdia_objects_v8', researchObjects);
   renderObjects(activeObjectFilter);
+  renderInlineResearchObjects();
   renderPortalObjects();
   toggleCreatePanel(null);
   e.target.reset();
@@ -1060,7 +1216,7 @@ slider.addEventListener('input', () => {
   document.getElementById('lcd-2').textContent = 'RIVER: N/A';
 });
 
+syncResearchBranchSections();
 syncProjectPreview();
 syncObjectPreview();
 renderProjects('ALL');
-renderObjects('ALL');
